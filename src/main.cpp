@@ -10,10 +10,10 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-#include "SmallestEnclosingCircle.h"
+// #include "SmallestEnclosingCircle.h"
 #include <cstddef>
 #include <cmath>
-#include "stringgenc.h"
+// #include "stringgenc.h"
 
 using namespace std;
 using std::size_t;

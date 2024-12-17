@@ -10,7 +10,7 @@
 #include "data_utility.h"
 #include "irtree.h"
 #include "costenum.h"
-#include "guo_mck.h"
+// #include "guo_mck.h"
 #include "data_struct_operation.h"
 
 

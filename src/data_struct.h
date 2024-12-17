@@ -1,5 +1,4 @@
 /*
- *	Author: Cheng Long
  *	Email: clong@cse.ust.hk
  */
 

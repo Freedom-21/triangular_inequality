@@ -1,12 +1,12 @@
 
 #include "frac.h"
-#include "distance_cache.h"
+// #include "distance_cache.h"
 #include "data_struct.h" // Ensure this is included if not already
 #include <cassert>
 #include <limits>
 
 
-int determine_max_feature_id(data_t* data_v);
+// int determine_max_feature_id(data_t* data_v);
 
 /*
  *  [Apriori]
@@ -77,7 +77,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
                 fsi_v3 = add_fsi(fsi_v1, fea_v1);
 
                 // Prune step
-                if (i > 1 && !all_subsets_exist_with_distance(result[i -1], fsi_v3, dist_thr)) {
+                if (i > 1 && !all_subsets_exist(result[i -1], fsi_v3)) {
                     printf("Pruning candidate set with features:");
                     for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
                     printf("\n");
@@ -152,20 +152,11 @@ fsi_set_t* const_L1_apriori()
         fsi_v = alloc_fsi(1);
         fsi_v->feaset[0] = bst_node_v->key;
 
-        if (cost_tag == 2) {
-            // L1 is number of objects with the feature
-            sup = bst_node_v->p_list_obj->obj_n;
-            sup = sup / fea_highest_freq; // normalization
-        } else {
-            sup = 1; // by definition
-        }
+        sup = 1; // by definition
 
         fsi_v->sup = sup;
 
-        if (sup >= min_sup)
-            add_fsi_set_entry(fsi_set_v, fsi_v);
-        else
-            release_fsi(fsi_v);
+        add_fsi_set_entry(fsi_set_v, fsi_v);
 
         bst_node_v = bst_successor(bst_node_v);
     }
@@ -200,86 +191,6 @@ FEA_TYPE join_check(fsi_t* fsi_v1, fsi_t* fsi_v2)
 
     return fea_v;
 }
-
-/*
- *  The checking for the prune step.
- *
- *  return true if all subsets of @fsi_v appear in @fsi_set_v.
- *
- *  Method:
- *  ignore one of the feature one by one to form the k-1 size feature set
- *  thus, number of k-1 size feature set = k
- *
- *  for each such feature set, we check whether it is in @fsi_set_v
- *  if not, return false
- */
-// all_subsets_exist_with_distance.cpp
-
-// #include "distance_cache.h"
-// #include "data_struct.h" // Ensure this is included if not already
-// #include <vector>
-// #include <cassert>
-
-// Function to check if all (k-1)-sized subsets exist and satisfy distance constraints
-bool all_subsets_exist_with_distance(fsi_set_t* fsi_set_v, fsi_t* fsi_v, double dist_thr) {
-    // Iterate over each feature to generate subsets
-    for (int i = 0; i < fsi_v->fea_n; i++) {
-        std::vector<FEA_TYPE> subset;
-        for (int j = 0; j < fsi_v->fea_n; j++) {
-            if (j != i)
-                subset.push_back(fsi_v->feaset[j]);
-        }
-
-        bool subset_exists = false;
-
-        // Iterate through existing frequent itemsets
-        fsi_t* current_fsi = fsi_set_v->head->next;
-        while (current_fsi != NULL) {
-            bool match = true;
-            for (auto fea : subset) {
-                bool found = false;
-                for (int k = 0; k < current_fsi->fea_n; k++) {
-                    if (current_fsi->feaset[k] == fea) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    match = false;
-                    break;
-                }
-            }
-
-            if (match) {
-                // Implement triangular inequality-based distance checks here
-                bool distance_ok = true;
-                // Example: Compute or retrieve distance bounds
-                // If any inferred distance exceeds dist_thr, set distance_ok to false
-                // ...
-
-                // For debugging, assume distance_ok is true
-                distance_ok = true; // Placeholder
-
-                if (distance_ok) {
-                    subset_exists = true;
-                    break; // Found a valid subset with distance constraints
-                }
-            }
-
-            current_fsi = current_fsi->next;
-        }
-
-        if (!subset_exists) {
-            printf("Pruning candidate set with features:");
-            for(auto fea : subset) printf(" %d", fea);
-            printf("\n");
-            return false; // Prune the candidate as this subset doesn't exist or fails distance constraints
-        }
-    }
-
-    return true; // All subsets exist and satisfy distance constraints
-}
-
 
 bool all_subsets_exist(fsi_set_t* fsi_set_v, fsi_t* fsi_v)
 {
@@ -336,73 +247,73 @@ bool all_subsets_exist(fsi_set_t* fsi_set_v, fsi_t* fsi_v)
 //  */
 B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
 {
-    B_KEY_TYPE sup = std::numeric_limits<B_KEY_TYPE>::infinity();
-    B_KEY_TYPE sup_C_f = 0;
+        B_KEY_TYPE sup, sup_C_f;
+    obj_node_t* obj_node_v;
+    obj_set_t* obj_set_v;
 
-    // Allocate and initialize the Row Instance (RI) array
+    sup = INFINITY;
+    sup_C_f = 0;
+
+    //    FEA_TYPE fea_worst;
+    //    obj_set_t* obj_set_worst;
+
+    // keep track objects that are involved in row instances that have been found
+    // note that obj_id-1 is needed inside the array
     bool* RI = new bool[numOfObj]();
 
-    // Iterate over each feature in the feature set
+    // for each feature f in C
     for (int i = 0; i < fsi_v->fea_n; i++) {
         sup_C_f = 0;
-        FEA_TYPE current_fea = fsi_v->feaset[i];
 
-        // Retrieve the inverted list for the current feature
-        struct bst_node* bst_node = bst_search(IF_v, current_fea);
-        if (bst_node == nullptr) {
-            printf("Feature %d not found in inverted index.\n", current_fea);
-            sup_C_f = 0.0;
-        } else {
-            obj_set_t* obj_set_v = bst_node->p_list_obj;
-            obj_node_t* obj_node_v = obj_set_v->head->next;
-
-            // Iterate over each object in the inverted list
-            while (obj_node_v != NULL) {
-                int obj_id = obj_node_v->obj_v->id - 1;
-                assert(obj_id >= 0 && obj_id < numOfObj);
-                bool flag = RI[obj_id];
-
-                if (flag || check_row_instance(alg_opt, fsi_v, obj_node_v->obj_v, RI)) {
-                    sup_C_f += 1.0; // Each valid row instance counts as 1
-                }
-
-                obj_node_v = obj_node_v->next;
+        // the corresponding inverted list in IF
+        obj_set_v = ((bst_node_t*)bst_search(IF_v, fsi_v->feaset[i]))->p_list_obj;
+        obj_node_v = obj_set_v->head->next;
+        // for each object o with the feature f
+        while (obj_node_v != NULL) {
+            bool flag = false;
+         {
+#ifndef WIN32
+                float sys_t, S3_t = 0;
+                struct rusage S3_sta, S3_end;
+                GetCurTime(&S3_sta);
+#endif
+                flag = RI[obj_node_v->obj_v->id - 1];
+                if (flag)
+                    stat_v.S3_sum++;
+#ifndef WIN32
+                GetCurTime(&S3_end);
+                GetTime(&S3_sta, &S3_end, &S3_t, &sys_t);
+                stat_v.S3_time += S3_t;
+#endif
             }
 
-            // Normalize support by the number of objects containing the feature
-            if (cost_tag == 1) {
-                sup_C_f = sup_C_f / static_cast<B_KEY_TYPE>(obj_set_v->obj_n);
-                printf("Feature %d: sup_C_f = %.5lf / %d = %.5lf\n", current_fea, sup_C_f * obj_set_v->obj_n, obj_set_v->obj_n, sup_C_f);
+            if (flag || check_row_instance(alg_opt, fsi_v, obj_node_v->obj_v, RI)) {
+                if (cost_tag == 1)
+                    sup_C_f += 1; //each group is counted as 1
             }
+
+            obj_node_v = obj_node_v->next;
         }
 
-        // Maintain the smallest support across features
+        if (cost_tag == 1)
+            sup_C_f = sup_C_f / (double)obj_set_v->obj_n;
+
+        // maintain the smallest one here
         if (sup_C_f <= sup) {
             sup = sup_C_f;
-            printf("Updated minimum support to %.5lf\n", sup);
 
-            // Early stopping if support falls below the threshold
-            if (cost_tag == 1 && sup < min_sup) {
-                printf("Early stopping: Support %.5lf < min_sup %.5lf\n", sup, min_sup);
+            // early stopping: sup of this fea set < threshold
+            if (cost_tag == 1 && sup < min_sup)
                 break;
-            }
         }
     }
-
-    // Assign the computed support to the feature set
+    if (cost_tag == 2)
+        sup = sup / fea_highest_freq;
     fsi_v->sup = sup;
-
-    // Clean up the RI array
     delete[] RI;
-
-    // Debug: Print final support
-    printf("Final support for feature set:");
-    for(int f = 0; f < fsi_v->fea_n; f++) printf(" %d", fsi_v->feaset[f]);
-    printf(" is %.5lf\n", sup);
 
     return sup;
 }
-
 
 /*
  *  Perform check row instance operation
@@ -719,10 +630,6 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
     // note that obj_set_v is released inside the functions
     if (alg_opt2 == 1)
         feasibleflag3 = combinatorial(fsi_v, obj_v, obj_set_v, RI);
-    // else if (alg_opt2 == 2)
-    // //     feasibleflag3 = dia(fsi_v, obj_v, obj_set_v, RI);
-    // else // if(alg_opt2 == 3)
-    //     feasibleflag3 = mck(fsi_v, obj_v, obj_set_v, RI);
 
 #ifndef WIN32
     GetCurTime(&S5_end);
@@ -775,110 +682,6 @@ bool check_Nof2_feasibility(fsi_t* fsi_v, obj_t* obj_v)
 }
 
 
-// void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
-// {
-//     k_node_t *k_head, *k_node_v;
-//     disk_t* disk_v;
-//     loc_t* loc_v;
-//     obj_set_t* obj_set_v;
-//     obj_node_t* obj_node_v;
-//     //    std::unordered_map<FEA_TYPE,int>* map, * map2;
-//     //    std::unordered_map<FEA_TYPE,float> * tmp;
-//     int *map, *map2;
-//     float* tmp;
-
-//     k_head = collect_keywords_bst(IF_v);
-	
-//     /*s*/
-//     stat_v.memory_v += (sizeof(float) * data_v->key_n) * data_v->obj_n;
-//     stat_v.memory_v += (sizeof(int) * data_v->key_n) * data_v->obj_n * 2;
-//     if (stat_v.memory_v > stat_v.memory_max)
-//         stat_v.memory_max = stat_v.memory_v;
-//     /*s*/
-
-//     // for each object
-//     for (int i = 0; i < data_v->obj_n; i++) {
-//         data_v->obj_v[i].frac_f = new float[data_v->key_n]();
-//         data_v->obj_v[i].N_o_f = new int[data_v->key_n]();
-//         data_v->obj_v[i].N_o_f2 = new int[data_v->key_n]();
-//     }
-
-// // 	//*we iterate each object that contain frequent labels
-// //     // for each object
-//     for (int i = 0; i < data_v->obj_n; i++) {
-		
-// 		FEA_TYPE fea = data_v->obj_v[i].fea;
-// 		bst_node_t* bst_node_v =  bst_search(IF_v, fea);
-// 		if(bst_node_v !=NULL){
-// 			double n = bst_node_v->p_list_obj->obj_n;
-// 			if(n<fea_highest_freq*min_sup){
-// 				continue;
-// 			}
-// 		}
-		
-//         map = data_v->obj_v[i].N_o_f;
-//         map2 = data_v->obj_v[i].N_o_f2;
-
-//         // 2. find all objects in range D(o,d)
-//         loc_v = get_obj_loc(&data_v->obj_v[i]);
-
-//         disk_v = alloc_disk(IRTree_v.dim);
-//         set_disk(disk_v, loc_v, dist_thr);
-
-//         obj_set_v = range_query(disk_v);
-
-//         // 3. loop each obj in range
-//         obj_node_v = obj_set_v->head->next;
-//         while (obj_node_v != NULL) {
-//             map[obj_node_v->obj_v->fea - 1]++;
-
-//             if (calc_dist_obj(obj_node_v->obj_v, &data_v->obj_v[i]) <= dist_thr / 2)
-//                 map2[obj_node_v->obj_v->fea - 1]++;
-
-//             obj_node_v = obj_node_v->next;
-//         }
-
-// //         //-------------
-//         obj_node_v = obj_set_v->head->next;
-//         while (obj_node_v != NULL) {
-//             tmp = obj_node_v->obj_v->frac_f;
-//             tmp[data_v->obj_v[i].fea - 1] += 1 / ((double)map[obj_node_v->obj_v->fea - 1]);
-
-//             if (tmp[data_v->obj_v[i].fea - 1] > 1)
-//                 tmp[data_v->obj_v[i].fea - 1] = 1;
-
-//             obj_node_v = obj_node_v->next;
-//         }
-
-// //         //-------------
-//         release_disk(disk_v);
-//         release_obj_set(obj_set_v);
-//         release_loc(loc_v);
-//     }
-
-//     release_k_list(k_head);
-// }
-// precomputation.cpp
-
-// Placeholder declarations for missing functions and variables
-// extern bst_node_t* bst_search(struct bst* tree, FEA_TYPE fea);
-// extern struct bst* IF_v; // Inverted index tree
-// extern IRTree IRTree_v; // IRTree structure
-// extern double fea_highest_freq;
-// extern double min_sup;
-// extern struct stat_struct stat_v; // Assuming this is defined elsewhere
-
-// Function to determine the maximum feature ID
-int determine_max_feature_id(data_t* data_v) {
-    int max_fea_id = 0;
-    for (int i = 0; i < data_v->obj_n; i++) {
-        if (data_v->obj_v[i].fea > max_fea_id) {
-            max_fea_id = data_v->obj_v[i].fea;
-        }
-    }
-    return max_fea_id;
-}
-
 void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
 {
     k_node_t *k_head, *k_node_v;
@@ -886,54 +689,44 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
     loc_t* loc_v;
     obj_set_t* obj_set_v;
     obj_node_t* obj_node_v;
+    //    std::unordered_map<FEA_TYPE,int>* map, * map2;
+    //    std::unordered_map<FEA_TYPE,float> * tmp;
     int *map, *map2;
     float* tmp;
 
-    // Collect keywords from BST
     k_head = collect_keywords_bst(IF_v);
 	
-    /* Update memory statistics */
+    /*s*/
     stat_v.memory_v += (sizeof(float) * data_v->key_n) * data_v->obj_n;
     stat_v.memory_v += (sizeof(int) * data_v->key_n) * data_v->obj_n * 2;
     if (stat_v.memory_v > stat_v.memory_max)
         stat_v.memory_max = stat_v.memory_v;
+    /*s*/
 
-    /* Allocate memory for each object */
+    // for each object
     for (int i = 0; i < data_v->obj_n; i++) {
-        data_v->obj_v[i].frac_f = new float[data_v->key_n]();
+        // data_v->obj_v[i].frac_f = new float[data_v->key_n]();
         data_v->obj_v[i].N_o_f = new int[data_v->key_n]();
         data_v->obj_v[i].N_o_f2 = new int[data_v->key_n]();
-        data_v->obj_v[i].distance_bounds = nullptr; // Initialize to nullptr
     }
 
-    // Determine the maximum feature ID for distance_bounds allocation
-    int max_fea_id = determine_max_feature_id(data_v);
-
-    // Populate the object list for distance caching
-    obj_list.reserve(data_v->obj_n);
+// 	//*we iterate each object that contain frequent labels
+//     // for each object
     for (int i = 0; i < data_v->obj_n; i++) {
-        obj_list.push_back(&data_v->obj_v[i]);
-    }
-
-    // Initialize feature to object IDs mapping
-    initialize_fea_to_obj_id_map(data_v);
-
-    // Precompute distances and populate distance_bounds
-    for (int i = 0; i < data_v->obj_n; i++) {
-        // Check if the feature frequency meets the threshold
-        FEA_TYPE fea = data_v->obj_v[i].fea;
-        bst_node_t* bst_node_v = bst_search(IF_v, fea);
-        if (bst_node_v != NULL) {
-            double n = static_cast<double>(bst_node_v->p_list_obj->obj_n);
-            if (n < fea_highest_freq * min_sup) {
-                continue;
-            }
-        }
+		
+		FEA_TYPE fea = data_v->obj_v[i].fea;
+		bst_node_t* bst_node_v =  bst_search(IF_v, fea);
+		if(bst_node_v !=NULL){
+			double n = bst_node_v->p_list_obj->obj_n;
+			if(n<fea_highest_freq*min_sup){
+				continue;
+			}
+		}
 		
         map = data_v->obj_v[i].N_o_f;
         map2 = data_v->obj_v[i].N_o_f2;
 
-        // Find all objects within distance threshold using IRTree
+        // 2. find all objects in range D(o,d)
         loc_v = get_obj_loc(&data_v->obj_v[i]);
 
         disk_v = alloc_disk(IRTree_v.dim);
@@ -941,70 +734,21 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
 
         obj_set_v = range_query(disk_v);
 
-        // Initialize distance_bounds if not already allocated
-        if (data_v->obj_v[i].distance_bounds == nullptr) {
-            data_v->obj_v[i].distance_bounds = new double[max_fea_id + 1];
-            // Initialize all distances to a large value
-            for (int f = 0; f <= max_fea_id; f++) {
-                data_v->obj_v[i].distance_bounds[f] = std::numeric_limits<double>::max();
-            }
-        }
-
-        // Loop through each object in range to update maps and distance_bounds
+        // 3. loop each obj in range
         obj_node_v = obj_set_v->head->next;
         while (obj_node_v != NULL) {
-            FEA_TYPE neighbor_fea = obj_node_v->obj_v->fea;
-            int neighbor_id = obj_node_v->obj_v->id;
+            map[obj_node_v->obj_v->fea - 1]++;
 
-            // Increment feature counts
-            map[neighbor_fea - 1]++;
-
-            // Calculate exact distance and update map2
-            double exact_dist = calc_dist_obj(obj_node_v->obj_v, &data_v->obj_v[i]);
-            if (exact_dist <= dist_thr / 2.0) {
-                map2[neighbor_fea - 1]++;
-            }
-
-            // Update distance_bounds with the minimum distance
-            if (exact_dist < data_v->obj_v[i].distance_bounds[neighbor_fea]) {
-                data_v->obj_v[i].distance_bounds[neighbor_fea] = exact_dist;
-            }
-
-            // Similarly, update the neighbor's distance_bounds
-            // Allocate neighbor's distance_bounds if necessary
-            if (data_v->obj_v[neighbor_id - 1].distance_bounds == nullptr) {
-                data_v->obj_v[neighbor_id - 1].distance_bounds = new double[max_fea_id + 1];
-                for (int f = 0; f <= max_fea_id; f++) {
-                    data_v->obj_v[neighbor_id - 1].distance_bounds[f] = std::numeric_limits<double>::max();
-                }
-            }
-            if (exact_dist < data_v->obj_v[neighbor_id - 1].distance_bounds[fea]) {
-                data_v->obj_v[neighbor_id - 1].distance_bounds[fea] = exact_dist;
-            }
+            if (calc_dist_obj(obj_node_v->obj_v, &data_v->obj_v[i]) <= dist_thr / 2)
+                map2[obj_node_v->obj_v->fea - 1]++;
 
             obj_node_v = obj_node_v->next;
         }
 
-        // Update fraction features
-        obj_node_v = obj_set_v->head->next;
-        while (obj_node_v != NULL) {
-            FEA_TYPE neighbor_fea = obj_node_v->obj_v->fea;
-            int neighbor_id = obj_node_v->obj_v->id;
-
-            // Update frac_f based on N_o_f
-            if (map[neighbor_fea - 1] != 0) {
-                data_v->obj_v[neighbor_id - 1].frac_f[fea - 1] += 1.0f / static_cast<float>(map[neighbor_fea - 1]);
-                if (data_v->obj_v[neighbor_id - 1].frac_f[fea - 1] > 1.0f) {
-                    data_v->obj_v[neighbor_id - 1].frac_f[fea - 1] = 1.0f;
-                }
-            }
-
-            obj_node_v = obj_node_v->next;
-        }
-
-        // Release resources
         release_disk(disk_v);
         release_obj_set(obj_set_v);
         release_loc(loc_v);
     }
+
+    release_k_list(k_head);
 }
