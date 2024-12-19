@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "data_utility.h"
 #include "irtree.h"
-#include "costenum.h"
+#include "joinless_utility.h"
 #include <vector>
 
 fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea);

@@ -44,13 +44,6 @@ typedef struct node
 	node*	parent;			//pointer to the parent node.
 	void**	child;			//pointer array(because the inner-node and leaf-node has different chidren) 
 	range** MBRs;			//closing MBRange within 'x' dimension.
-
-	//Extension for IR-tree.
-	//BIT_TYPE *keys;
-		//bit array is adopted for representing the posting list.
-		//adjacent list is another data structure option.
-	//k_node_t** key;
-
 	bst_t*	bst_v;
 	
 }	node_t;
@@ -68,13 +61,6 @@ typedef struct	IRTree
 
 	int		inner_n;		//the number of inner-nodes.
 	int		leaf_n;			//the number of leaf-nodes.
-
-	//bool*	is_first;		//used for the r*-tree.
-	//int	height_max;		//used for the r*-tree.
-
-	//IF info.
-	//int		key_n;
-	
 }	IRTree_t;
 
 //

@@ -1,12 +1,3 @@
-//
-//  data_struct_operation.cpp
-//  colocation
-//
-// ** for "basic" operations like create/release object_set_t / fsi_t
-//
-//  Created by Harry on 26/10/2018.
-//  Copyright © 2018 Harry. All rights reserved.
-//
 
 #include <stdio.h>
 #include "data_struct_operation.h"
@@ -58,30 +49,6 @@ fsi_set_t* alloc_fsi_set()
 }
 
 /*
- *	Allocate a fsi_set_list_t structure.
- */
-/*
- fsi_set_list_t* alloc_fsi_set_list(){
- 
- fsi_set_list_t* fsi_set_list_v;
- 
- fsi_set_list_v = ( fsi_set_list_t*)malloc( sizeof( fsi_set_list_t));
- memset( fsi_set_list_v, 0, sizeof( fsi_set_list_t));
- 
- fsi_set_list_v->head = (fsi_set_t*) malloc( sizeof(fsi_set_t));
- memset(fsi_set_list_v->head, 0, sizeof(fsi_set_t));
- 
- 
- stat_v.memory_v += sizeof( fsi_set_t) + sizeof( fsi_t);
- if( stat_v.memory_v > stat_v.memory_max)
- stat_v.memory_max = stat_v.memory_v;
- 
- 
- return fsi_set_list_v;
- }
- */
-
-/*
  *	Release a fsi_t structure.
  */
 void release_fsi(fsi_t* fsi_v)
@@ -119,34 +86,6 @@ void release_fsi_set(fsi_set_t* fsi_set_v)
 
     free(fsi_set_v);
 }
-
-/*
- *	Release the memory of an fsi_set_list_t structure.
- */
-/*
- void release_fsi_set_list( fsi_set_list_t* fsi_set_list_v)
- {
- fsi_set_t* fsi_set_v1, *fsi_set_v2;
- 
- if( !fsi_set_list_v)
- return;
- 
- 
- stat_v.memory_v -= sizeof( fsi_set_list_t) + sizeof( fsi_set_t);
- 
- fsi_set_v1 = fsi_set_list_v->head;
- while( fsi_set_v1->next != NULL)
- {
- fsi_set_v2 = fsi_set_v1->next;
- release_fsi_set(fsi_set_v1);
- 
- fsi_set_v1 = fsi_set_v2;
- }
- release_fsi_set(fsi_set_v1);
- 
- free( fsi_set_list_v);
- }
- */
 
 void add_fsi_set_entry(fsi_set_t* fsi_set_v, fsi_t* fsi_v)
 {
@@ -293,129 +232,6 @@ void print_fsi_set(fsi_set_t** result, int numOfFea, FILE* o_fp)
             fprintf(o_fp, "\n");
         }
     }
-}
-
-void print_maximal_fsi_set(fsi_set_t** result, int numOfFea, FILE* o_fp)
-{
-    for (int i = 0; i < numOfFea; i++) {
-        if (result[i] != NULL) {
-            fsi_t* fsi_v = result[i]->head->next;
-
-            if (fsi_v != NULL)
-                fprintf(o_fp, "%d\n", result[i]->fsi_n);
-
-            while (fsi_v != NULL) {
-                if (i == numOfFea - 1 || is_maximal(fsi_v, result[i + 1]))
-                    print_fsi(fsi_v, o_fp);
-
-                fsi_v = fsi_v->next;
-            }
-            fprintf(o_fp, "\n");
-        }
-    }
-}
-
-/*
- * check whether any set in fsi_set_v is superset of fsi_cur
- */
-
-bool is_maximal(fsi_t* fsi_cur, fsi_set_t* fsi_set_v)
-{
-    fsi_t* fsi_v;
-
-    fsi_v = fsi_set_v->head->next;
-    while (fsi_v != NULL) {
-        if (is_subset(fsi_cur, fsi_v))
-            return false;
-        fsi_v = fsi_v->next;
-    }
-    return true;
-}
-
-/**
- * Check whether fsi_v1 is a subset of fsi_v2
- */
-bool is_subset(fsi_t* fsi_v1, fsi_t* fsi_v2)
-{
-    if (fsi_v1->fea_n > fsi_v2->fea_n)
-        return false;
-
-    for (int i = 0; i < fsi_v1->fea_n; i++) {
-        bool tag = false;
-        FEA_TYPE fea = fsi_v1->feaset[i];
-        for (int j = 0; j < fsi_v2->fea_n; j++) {
-            if (fea == fsi_v2->feaset[j]) {
-                tag = true;
-                break;
-            }
-        }
-        if (!tag)
-            return false;
-    }
-    return true;
-}
-
-/*
- * Check whether @fea is in @fsi_v
- */
-bool has_fea(fsi_t* fsi_v, FEA_TYPE fea)
-{
-    for (int i = 0; i < fsi_v->fea_n; i++) {
-        if (fsi_v->feaset[i] == fea)
-            return true;
-    }
-    return false;
-}
-
-/*
- * check whether two object sets interest
- */
-bool check_obj_set_equal_interest(obj_set_t* v1, obj_set_t* v2)
-{
-    obj_node_t *obj_node_v1, *obj_node_v2;
-
-    obj_node_v1 = v1->head->next;
-    while (obj_node_v1 != NULL) {
-        obj_node_v2 = v2->head->next;
-        while (obj_node_v2 != NULL) {
-            if (obj_node_v1->obj_v == obj_node_v2->obj_v) {
-                return true;
-            }
-            obj_node_v2 = obj_node_v2->next;
-        }
-
-        obj_node_v1 = obj_node_v1->next;
-    }
-    return false;
-}
-
-
-/*
- *	Check whether the object set @O_t coveres the feasible set @fsi.
- *  ** possible running time improvement by iterating obj ?
- */
-bool check_feasibility(obj_set_t* O_t, fsi_t* fsi_v)
-{
-	int tag;
-	obj_node_t* obj_node_v;
-	
-	for (int i = 0; i < fsi_v->fea_n; i++) {
-		tag = 0;
-		obj_node_v = O_t->head->next;
-		while (obj_node_v != NULL) {
-			if (obj_node_v->obj_v->fea == fsi_v->feaset[i]) {
-				tag = 1;
-				break;
-			}
-			
-			obj_node_v = obj_node_v->next;
-		}
-		
-		if (tag == 0)
-			return false;
-	}
-	
-	return true;
 }
 
 /*

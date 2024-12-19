@@ -151,6 +151,8 @@ void colocation()
 
         printf("Query #%i ...\n", i + 1);
 
+        // result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr); // testing improved alone
+
         if (cfg->alg_opt == 5) {
             result = joinless_mining(data_v, cfg->obj_n, cfg->key_n);
         } else if (cfg->alg_opt == 41) {

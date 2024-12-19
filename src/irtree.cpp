@@ -1,31 +1,4 @@
-/*
- *	Author: Cheng Long
- *	Email: clong@cse.ust.hk
- */
-
-/*
- *  IR-tree.cpp includes the implementations of the functions in IR-tree.h.
- */
-
 #include "irtree.h"
-
-/*----------------------Calculation related APIs--------------------------*/
-
-/*
-* abs is over-loading edition of 'abs(int)' in math.h.
-*
-*  Same.
-* 
-* return the absolute MBRs of var(double).
-**
-double abs(double var)
-{
-	if(var<0)
-		return -var;
-	else 
-		return var;
-};
-*/
 
 /*
 * CreateNode malloc the storage space for a pointer to 'node'.
@@ -59,14 +32,6 @@ void CreateNode( node_t* &pnode)
 	if( stat_v.tree_memory_v > stat_v.tree_memory_max)
 		stat_v.tree_memory_max = stat_v.tree_memory_v;
 	/*s*/
-
-/*	
-	for(i=0; i<M; i++)
-	{
-		pnode->child[i] = (node_t*)malloc(sizeof(node));
-		pnode->MBRs[i] = (range*)malloc(sizeof(range));
-	}
-*/
 }
 
 /*

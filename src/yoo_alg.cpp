@@ -526,54 +526,6 @@ B_KEY_TYPE comp_PI(fsi_t* fsi_v, obj_set_t* O)
     return participation_index;
 }
 
-/*
- *  Output: @sup = sup(C)
-//  */
-// B_KEY_TYPE comp_sup(fsi_t* fsi_v, obj_set_t* O)
-// {
-
-//     B_KEY_TYPE sup, sup_C_f;
-//     obj_node_t* obj_node_v;
-//     obj_set_t* obj_set_v;
-//     loc_t* loc_v;
-//     disk_t* disk_v;
-
-//     sup = INFINITY;
-//     sup_C_f = 0;
-
-//     //for each feature f in C
-//     for (int i = 0; i < fsi_v->fea_n; i++) {
-//         sup_C_f = 0;
-
-//         if (O != NULL) //L1
-//             obj_node_v = O->head->next;
-//         else //L_k
-//             //the corresponding inverted list in IF
-//             obj_node_v = ((bst_node_t*)bst_search(IF_v, fsi_v->feaset[i]))->p_list_obj->head->next;
-
-//         //for each object o with the feature f
-//         while (obj_node_v != NULL) {
-//             if (obj_exist(fsi_v->obj_set_list_v, obj_node_v->obj_v)) {
-//                 sup_C_f += min_frac_receive(fsi_v, obj_node_v->obj_v);
-//                 if (sup_C_f > sup) {
-//                    // stat_v.S4_sum++;
-//                     break;
-//                 }
-//             }
-
-//             obj_node_v = obj_node_v->next;
-//         }
-
-//         if (sup_C_f <= sup)
-//             sup = sup_C_f;
-//     }
-
-//     sup = sup / fea_highest_freq;
-//     fsi_v->sup = sup;
-
-//     return sup;
-// }
-
 // check whether the object @obj_v exist in any of the object set in @obj_set_list_v
 bool obj_exist(vector<obj_set_t*>* obj_set_list_v, obj_t* obj_v)
 {

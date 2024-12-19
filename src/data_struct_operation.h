@@ -10,7 +10,7 @@
 #define data_struct_operation_h
 
 #include "data_utility.h"
-#include "costenum.h"
+#include "joinless_utility.h"
 #include "irtree.h"
 
 /* ------------------------- create/add/release  ------------------------- */

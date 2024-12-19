@@ -9,7 +9,6 @@
 
 #include "data_struct.h"
 #include "irtree.h"
-#include "b_heap.h"
 #include "frac.h"
 
 
@@ -182,7 +181,7 @@ B_KEY_TYPE comp_cost( int cost_tag, obj_set_t* obj_set_v, query_t* q);
 
 obj_set_t* comp_bounds( query_t* q, B_KEY_TYPE &LB, B_KEY_TYPE &UB, disk_t* disk_v);
 
-b_heap_t* heap_sort_obj_set( obj_set_t* obj_set_v, query_t* q);
+// b_heap_t* heap_sort_obj_set( obj_set_t* obj_set_v, query_t* q);
 
 void obj_exclusion_disk( obj_set_t* obj_set_v, disk_t* disk_v);
 

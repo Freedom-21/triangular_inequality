@@ -100,7 +100,7 @@ typedef struct fsi_set_set
 //----------------
 
 
-//From costenum.h
+//From joinless_utility.h
 //Inverted File related structures.
 typedef struct k_node 
 {
@@ -149,7 +149,7 @@ typedef struct obj_set
 }	obj_set_t;
 
 
-//From costenum.h.
+//From joinless_utility.h.
 
 //The structure for storing a location.
 typedef struct loc
