@@ -1,17 +1,31 @@
-//
-//  data_struct_operation.h
-//  colocation
-//
-//  Created by Harry on 26/10/2018.
-//  Copyright © 2018 Harry. All rights reserved.
-//
-
 #ifndef data_struct_operation_h
 #define data_struct_operation_h
+
+#define BIT_TYPE	unsigned int
 
 #include "data_utility.h"
 #include "joinless_utility.h"
 #include "irtree.h"
+
+
+/*
+ *	1. The bitwise operations are based on the "BIT_TYPE type",
+ *	which has 4 bytes.
+ *
+ *	2. It is possible to extend the number of bits to 64 bits.
+ */
+
+#include <math.h>
+//#include <stdint.h>
+
+
+int get_k_bit( BIT_TYPE v, int k);
+
+void insert_k_bit( BIT_TYPE &v, int k);
+
+void delete_k_bit( BIT_TYPE &v, int k);
+
+void union_bit( BIT_TYPE &v1, BIT_TYPE v2);
 
 /* ------------------------- create/add/release  ------------------------- */
 

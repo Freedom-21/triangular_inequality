@@ -1,8 +1,3 @@
-/*
- *	Author: Harry
- *	Email: khchanak@cse.ust.hk
- */
-
 #include "yoo_alg.h"
 
 /*
@@ -51,7 +46,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
     GetCurTime(&query_end);
 
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("L_1 time:%0.5lf\n", usr_t);
+    printf("P_1 time:%0.5lf\t\n", usr_t);
     GetCurTime(&query_sta);
 #endif
     //L_(i+1)
@@ -82,10 +77,8 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                     check_star_instance(fsi_v3, SN);
 
                     if (fsi_v3->fea_n > 2) {
-                        if (cost_tag == 1) //participation based
-                            sup = comp_PI(fsi_v3, NULL);
-                        // else //fraction based
-                        //     sup = comp_sup(fsi_v3, NULL);
+                        // if (cost_tag == 1) //participation based
+                        sup = comp_PI(fsi_v3, NULL);
 
                         if (sup < min_sup) {
                             //fsi_v3 is not a frequent pattern
@@ -105,8 +98,8 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                         filter_clique_instance(fsi_v3, result[i - 1], fsi_v3->obj_set_list_v);
                     }
                     //count step.
-                    if (cost_tag == 1) //participation based
-                        sup = comp_PI(fsi_v3, NULL);
+                    // if (cost_tag == 1) //participation based
+                    sup = comp_PI(fsi_v3, NULL);
                     // else //fraction based
                     //     sup = comp_sup(fsi_v3, NULL);
 
@@ -135,7 +128,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
         GetCurTime(&query_end);
 
         GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-        printf("L_%d\ttime:%0.5lf\t fsi_n:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
+        printf("Pattern_%d\ttime:%0.5lf\t # of colocation patterns:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
         GetCurTime(&query_sta);
 #endif
         /*t*/

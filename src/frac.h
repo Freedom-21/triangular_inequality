@@ -1,8 +1,3 @@
-/*
- *	Author: Harry
- *	Email: khchanak@cse.ust.hk
- */
-
 #ifndef frac_h
 #define frac_h
 
@@ -16,7 +11,7 @@ extern bool debug_mode;
 extern IRTree_t IRTree_v;
 extern bst_t* IF_v;
 
-extern int cost_tag;
+// extern int cost_tag;
 extern double fea_highest_freq;
 extern float dist_thr;
 extern float min_sup;

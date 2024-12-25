@@ -1,9 +1,3 @@
-
-/*
- *	Author: Cheng Long
- *	Email: clong@cse.ust.hk
- */
-
 /*
  *	The implementation of the binary search tree follows pseudo-code 
  *	in the textbook "Introduction to Algorithms".
@@ -18,10 +12,11 @@
 #include <float.h>
 #include <time.h>
 #include <limits.h>
-
+// #include "data_struct_operation.h"
 #include "bit_operator.h"
 #include "data_struct.h"
-//#include "data_struct2.h"
+
+
 
 //The structure of the node in bst.
 typedef struct bst_node
@@ -35,21 +30,13 @@ typedef struct bst_node
 
 	BIT_TYPE			p_list;		//in the IR-tree.
 	obj_set_t*			p_list_obj;	//a normal one.
-
-	//ConstructFeasibleSet-Exact specific:
-	//KEY2_TYPE			key2;
-	obj_t*				obj_v1;
-	obj_t*				obj_v2;
-    
-	//Cao-Exact specific:
-	//cns_t*	cns_v;
-	void*				cns_v;
+	// void*				cns_v;
 
 	//data_utility specific:
 	KEY_TYPE			key_id;
 	
     ///SKECa+
-    int freq;
+    // int freq;
     
 }	bst_node_t;
 

@@ -30,7 +30,7 @@ bool debug_mode = false;
 //user parameter
 float dist_thr;
 float min_sup;
-int cost_tag; //1= participation based; 2=fraction based
+// int cost_tag; //1= participation based; 2=fraction based
 double fea_highest_freq;
 
 //------------------------------------
@@ -72,7 +72,7 @@ void colocation()
     cfg = read_config_colocation();
     cfg->dim = 2;
 
-    cost_tag = cfg->cost;
+    // cost_tag = cfg->cost;
     dist_thr = cfg->dist_thr;
     min_sup = cfg->min_sup;
   //  min_conf = cfg->min_conf;
@@ -111,18 +111,12 @@ void colocation()
     build_IF(data_v);
 
     //---
-    if (cost_tag == 1) {
-        printf("participation based: min_sup:%lf\n", min_sup);
-    // } else {
-    //     fea_highest_freq = get_highest_freq(IF_v->root);
-    //     printf("Fraction based: Highest freq:%lf\t min_sup:%lf\n", fea_highest_freq, min_sup);
+    if (cfg->alg_opt == 1) {
+        printf("Redirected to the Joinless Algorithm with threshold prevalnce:%lf\n", min_sup);
+    } else {
+        printf("Redirected to the Improved Algorithm with threshold prevalnce:%lf\n", min_sup);
     }
     //---
-
-    //    //Get the whole range.
-    //    MBR = get_MBR_node( IRTree_v.root, IRTree_v.dim);
-
-    printf("Running apriori (Method %d):\n", cfg->alg_opt);
 
 #ifndef WIN32
 	
@@ -131,7 +125,7 @@ void colocation()
 	GetCurTime(&pre_sta);
 #endif
 	
-	//Pre-computation of N_o_f
+	//Pre-computation of NeighborCountWithinD
 	precomputation(data_v, cfg->dist_thr);
 	
 #ifndef WIN32
@@ -149,17 +143,16 @@ void colocation()
 
 #endif
 
-        printf("Query #%i ...\n", i + 1);
+        printf("Query #%i ...\n\t", i + 1);
 
         // result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr); // testing improved alone
 
-        if (cfg->alg_opt == 5) {
+        if (cfg->alg_opt == 1) {
             result = joinless_mining(data_v, cfg->obj_n, cfg->key_n);
-        } else if (cfg->alg_opt == 41) {
+        } else if (cfg->alg_opt == 2) {
             result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr);
         }else {
             // Invalid alg_opt: Print error message and stop execution
-            printf("Error: Invalid algorithm option %d. Please choose 41 (filter-and-verify + combinatorial), or 5 (joinless mining).\n", cfg->alg_opt);
             exit(EXIT_FAILURE);  
         }
 
@@ -181,16 +174,6 @@ void colocation()
                 fprintf(stderr, "Cannot open the colocation_result file.\n");
                 exit(0);
             }
-
-            //Print the query result.
-            print_fsi_set(result, cfg->key_n, r_fp);
-
-//            if ((r_fp2 = fopen(COLOCATION_RESULT_FILE2, "w")) == NULL) {
-//                fprintf(stderr, "Cannot open the colocation_result2 file.\n");
-//                exit(0);
-//            }
-			
-           // print_maximal_fsi_set(result, cfg->key_n, r_fp2);
 
 			fclose(r_fp);
 			//fclose(r_fp2);
@@ -260,152 +243,3 @@ void build_IF(data_t* data_v)
         }
     }
 }
-
-// double get_highest_freq(bst_node_t* bst_node_v)
-// {
-
-//     if (bst_node_v == NULL)
-//         return 0;
-
-//     //    double freq = bst_node_v->p_list_obj->obj_n;
-//     //    double l = get_highest_freq(bst_node_v->left);
-//     //    double r = get_highest_freq(bst_node_v->right);
-//     //
-//     //    return fmax(freq,fmax(l,r));
-
-//     return fmax(bst_node_v->p_list_obj->obj_n,
-//         fmax(get_highest_freq(bst_node_v->left), get_highest_freq(bst_node_v->right)));
-// }
-
-// fsi_set_t* read_patterns()
-// {
-//     fsi_set_t* result;
-//     fsi_t *fsi_v, *fsi_cur;
-//     ifstream readConfig;
-
-//     string STRING;
-//     vector<string> STRING2, arg;
-
-//     result = alloc_fsi_set();
-
-//     readConfig.open("pattern.txt");
-
-//     //fsi_cur always at the end of the list
-//     fsi_cur = result->head;
-//     int i = 0;
-//     while (!readConfig.eof()) {
-//         getline(readConfig, STRING);
-//         //		cout << "STRING: "<< STRING << endl;
-//         if (STRING.size() == 0)
-//             break;
-
-//         //putting config into vars.
-//         STRING2 = split(STRING, "  ");
-
-//         int size = (int)STRING2.size() - 1;
-//         fsi_v = alloc_fsi(size);
-
-//         for (int j = 0; j < STRING2.size() - 1; j++) {
-//             //			cout << "STRING2  " << j << ": "<< STRING2[j] << endl;
-//             fsi_v->feaset[j] = atoi(STRING2[j].c_str());
-//         }
-
-//         //		print_fsi(fsi_v, stdout);
-
-//         fsi_cur->next = fsi_v;
-//         fsi_cur = fsi_cur->next;
-//         i++;
-//     }
-
-//     return result;
-// }
-
-
-/*
- * Additional method for computing support of given fsi_sets
- * It reads "pattern.txt" line by line
- * Each line corrsponds to one fsi_set, the 0 to n-1 numbers are the features
- * Ouput result in console
- * Note that d and min-sup need to be set in config.txt
- //	1: participation
- //	2: fraction-score
- //	3: partitioning
- //	4: construction
- //	5: enumeration
- // 6: gen_scalability_data2 (put in here since it need to read data first)
-//  */
-// void colocation_patterns_support(int cost)
-// {
-// 	colocation_config_t* cfg;
-// 	data_t* data_v;
-	
-// 	memset(&stat_v, 0, sizeof(colocation_stat_t));
-	
-// 	//Read the cofig.
-// 	printf("Reading configuration ...\n");
-// 	cfg = read_config_colocation();
-// 	cfg->dim = 2;
-	
-// 	//cost_tag = cfg->cost;
-// 	cost_tag = cost;
-// 	dist_thr = cfg->dist_thr;
-// 	min_sup = cfg->min_sup;
-// 	//min_conf = cfg->min_conf;
-	
-// 	//Read the data.
-// 	printf("Reading data ...\n");
-// 	data_v = read_data_colocation(cfg);
-	
-// 	//Option 1: Build the tree from scratch.
-// 	//Build the IR-tree.
-// 	if (cfg->tree_tag == 0) {
-// 		printf("Building IR-tree ...\n");
-// 		build_IRTree(data_v);
-		
-// 		print_and_check_tree(1, cfg->tree_file);
-// 		//check_IF( );
-// 	} else {
-// 		//Option 2: Read an existing tree.
-// 		printf("Reading IR-Tree ...\n");
-// 		read_tree(cfg->tree_file);
-// 	}
-	
-	
-// 	//Build Inverted file
-// 	build_IF(data_v);
-// 	fea_highest_freq = get_highest_freq(IF_v->root);
-// 	printf("Highest freq:%lf\n", fea_highest_freq);
-	
-// 	//---
-// 	if (cost_tag == 1)
-// 		printf("participation based:\n");
-// 	else if(cost_tag==2){
-// 		printf("Fraction based:\n");
-// 		//Pre-computation of N_o_f
-// 		precomputation(data_v, cfg->dist_thr);
-		
-		
-// 	}else if(cost_tag==3)
-// 		printf("partitioning based: \n");
-// 	else if(cost_tag==4)
-// 		printf("construction based: \n");
-// 	else if(cost_tag==5)
-// 		printf("enumeration based: \n");
-	
-// 	//---
-// 	if(cost==6)
-// 		gen_scalability_data2(data_v);
-// 	//---
-	
-// 	fsi_set_t* patterns = read_patterns();
-	
-// 	fsi_t* fsi_cur = patterns->head->next;
-// 	while (fsi_cur != NULL) {
-// 		comp_support(cfg->alg_opt, fsi_cur, cfg->obj_n);
-// 		print_fsi(fsi_cur, stdout);
-// 		fsi_cur = fsi_cur->next;
-// 	}
-	
-// 	release_fsi_set(patterns);
-// 	free(cfg);
-// }

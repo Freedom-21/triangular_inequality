@@ -92,7 +92,7 @@ colocation_config_t* read_config_colocation()
     fscanf(c_fp, "%i", &cfg->alg_opt);
 
     //data.
-    fscanf(c_fp, "%i%i%s", &cfg->cost, &cfg->obj_n, cfg->loc_file);
+    fscanf(c_fp, "%i%s", &cfg->obj_n, cfg->loc_file);
 
     fscanf(c_fp, "%i%s", &cfg->key_n, cfg->doc_file);
 
@@ -130,35 +130,35 @@ void add_keyword_entry(k_node_t*& k_node_v, KEY_TYPE key)
 /*
  *	Copy the k_list info of @k_head2 to @k_head1.
  */
-void copy_k_list(k_node_t* k_head1, k_node_t* k_head2)
-{
-    k_node_t *k_node_iter1, *k_node_iter2;
+// void copy_k_list(k_node_t* k_head1, k_node_t* k_head2)
+// {
+//     k_node_t *k_node_iter1, *k_node_iter2;
 
-    k_node_iter1 = k_head1;
-    k_node_iter2 = k_head2->next;
-    while (k_node_iter2 != NULL) {
-        add_keyword_entry(k_node_iter1, k_node_iter2->key);
+//     k_node_iter1 = k_head1;
+//     k_node_iter2 = k_head2->next;
+//     while (k_node_iter2 != NULL) {
+//         add_keyword_entry(k_node_iter1, k_node_iter2->key);
 
-        k_node_iter2 = k_node_iter2->next;
-    }
-}
+//         k_node_iter2 = k_node_iter2->next;
+//     }
+// }
 
 /*
  *	Print the a list of keywords @k_head in @o_fp.
  */
-void print_k_list(k_node_t* k_head, FILE* o_fp)
-{
-    k_node_t* k_node_iter;
+// void print_k_list(k_node_t* k_head, FILE* o_fp)
+// {
+//     k_node_t* k_node_iter;
 
-    k_node_iter = k_head->next;
-    while (k_node_iter != NULL) {
-        fprintf(o_fp, "%.0lf  ", k_node_iter->key);
+//     k_node_iter = k_head->next;
+//     while (k_node_iter != NULL) {
+//         fprintf(o_fp, "%.0lf  ", k_node_iter->key);
 
-        k_node_iter = k_node_iter->next;
-    }
+//         k_node_iter = k_node_iter->next;
+//     }
 
-    fprintf(o_fp, "\n");
-}
+//     fprintf(o_fp, "\n");
+// }
 
 /****
  *	Print the location @k_head in @o_fp.
@@ -179,34 +179,27 @@ void print_loc(loc_t* loc_v, FILE* o_fp)
 void print_colocation_stat(colocation_config_t* cfg, int cnt)
 {
     FILE* s_fp;
-
     if (!(s_fp = fopen(COLOCATION_STAT_FILE, "w"))) {
-        fprintf(stderr, "Cannot open the coskq_stat file.\n");
-        exit(0);
+        fprintf(stderr, "Cannot open the statistics file.\n");
+        exit(EXIT_FAILURE);
     }
 
-    //	//average cost.
-    //	fprintf( s_fp, "%lf\n", stat_v.aver_cost);
-    //	//average size.
-    //	fprintf( s_fp, "%lf\n\n", stat_v.aver_size);
+    fprintf(s_fp, "R-tree Build Time: %.6f seconds\n", stat_v.irtree_build_time);
+    fprintf(s_fp, "Average Query Time: %.6f seconds\n\n", stat_v.q_time);
 
-    //time.
-    fprintf(s_fp, "%f\n%f\n\n", stat_v.irtree_build_time, stat_v.q_time);
+    fprintf(s_fp, "Memory usage (MB)\tR-tree memory usage (MB)\n");
+    fprintf(s_fp, "%.2f\t\t\t%.2f\n\n",
+            stat_v.memory_max / (1024 * 1024),
+            stat_v.tree_memory_max / (1024 * 1024));
 
-    //memory.
-    fprintf(s_fp, "%f\n", stat_v.memory_max / (1024 * 1024));
-
-    //IR-tree memory.
-    fprintf(s_fp, "%f\n\n", stat_v.tree_memory_max / (1024 * 1024));
-
-    //Method 4 related
-    fprintf(s_fp, "%lf\n%lf\n%lf\n%lf\n\n", stat_v.S3_sum, stat_v.S1_sum, stat_v.S2_sum, stat_v.S5_sum);
-
-    fprintf(s_fp, "%lf\n%lf\n%lf\n%lf\n",stat_v.S3_time, stat_v.S1_time, stat_v.S2_time,  stat_v.S5_time);
+    fprintf(s_fp, "Method\t\t\tCount\t\t\tTime (seconds)\n");
+    fprintf(s_fp, "Check 1\t\t\t%.0lf\t\t\t%.6f\n", stat_v.S1_sum, stat_v.S1_time);
+    fprintf(s_fp, "Check 2\t\t\t%.0lf\t\t\t%.6f\n", stat_v.S2_sum, stat_v.S2_time);
+    fprintf(s_fp, "Check 3\t\t\t%.0lf\t\t\t%.6f\n", stat_v.S3_sum, stat_v.S3_time);
+    fprintf(s_fp, "Check 4\t\t\t%.0lf\t\t\t%.6f\n", stat_v.S5_sum, stat_v.S5_time);
 
     fclose(s_fp);
 }
-
 /*
  *	Allocate the memory for an object.
  */
@@ -394,63 +387,3 @@ void release_data(data_t* data_v)
     free(data_v->obj_v);
     free(data_v);
 }
-// /*
-//  *
-//  */
-// range* collect_data_range(data_t* data_v)
-// {
-//     int i, j;
-//     range* MBR;
-
-//     MBR = (range*)malloc(data_v->dim * sizeof(range));
-//     memset(MBR, 0, data_v->dim * sizeof(range));
-
-//     for (i = 0; i < data_v->dim; i++) {
-//         MBR[i].min = FLT_MAX;
-//         MBR[i].max = -FLT_MAX;
-
-//         for (j = 0; j < data_v->obj_n; j++) {
-//             if (data_v->obj_v[j].MBR[i].min < MBR[i].min)
-//                 MBR[i].min = data_v->obj_v[j].MBR[i].min;
-
-//             if (data_v->obj_v[j].MBR[i].max > MBR[i].max)
-//                 MBR[i].max = data_v->obj_v[j].MBR[i].max;
-//         }
-//     }
-
-//     return MBR;
-// }
-
-// /*
-//  *
-//  */
-// void print_data(data_t* data_v, syn_config_t* s_cfg)
-// {
-//     int i, j;
-
-//     FILE *loc_fp, *doc_fp;
-
-//     if ((loc_fp = fopen(s_cfg->loc_file, "w")) == NULL || (doc_fp = fopen(s_cfg->doc_file, "w")) == NULL) {
-//         printf("Cannot open loc/doc files.\n");
-//         exit(0);
-//     }
-
-//     //Print the loc info.
-//     for (i = 0; i < data_v->obj_n; i++) {
-//         fprintf(loc_fp, "%i", data_v->obj_v[i].id);
-//         for (j = 0; j < data_v->dim; j++)
-//             fprintf(loc_fp, ",%f", data_v->obj_v[i].MBR[j].min);
-
-//         fprintf(loc_fp, "\n");
-//     }
-
-//     //Print the doc info.
-//     for (i = 0; i < data_v->obj_n; i++) {
-//         fprintf(doc_fp, "%i", data_v->obj_v[i].id);
-//         fprintf(doc_fp, "%i", (int)data_v->obj_v[i].fea);
-//         fprintf(doc_fp, "\n");
-//     }
-
-//     fclose(loc_fp);
-//     fclose(doc_fp);
-// }

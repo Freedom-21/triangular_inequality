@@ -13,17 +13,17 @@
  */
 fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 {
-    printf("Starting Apriori with alg_opt=%d, numOfObj=%d, numOfFea=%d, dist_thr=%.5f\n", alg_opt, numOfObj, numOfFea, dist_thr);
+    printf("Starting Improved Algorithm with, objects=%d, Features=%d, dist_thr=%.5f\n", numOfObj, numOfFea, dist_thr);
     int i, j;
     fsi_set_t** result; // storing overall result
-    fsi_set_t* fsi_set_cur; // prev = L_{k-1}, cur = L_{k}
+    fsi_set_t* fsi_set_cur; // prev = P_{k-1}, cur = P_{k}
     fsi_t *fsi_v1, *fsi_v2, *fsi_v3;
 
     FEA_TYPE fea_v1;
     B_KEY_TYPE sup;
 
     i = 0;
-    // Initialize the structure for storing L_1, L_2, ..., L_{|F|}
+    // Initialize the structure for storing P_1, P_2, ..., P_{|F|}
     result = (fsi_set_t**)malloc(numOfFea * sizeof(fsi_set_t*));
     memset(result, 0, numOfFea * sizeof(fsi_set_t*));
 
@@ -39,48 +39,48 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
     GetCurTime(&query_sta);
 #endif
 
-    // L_1
-    printf("Constructing L_1...\n");
+    // P_1
+    printf("Constructing P_1...\n");
     result[0] = const_L1_apriori();
 
 #ifndef WIN32
     GetCurTime(&query_end);
 
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("L_1 time:%0.5lf\n", usr_t);
+    printf("P_1 \ttime:%0.5lf\n", usr_t);
     GetCurTime(&query_sta);
 #endif
 
-    // L_(i)
+    // P_(i)
     for (i = 1; i < numOfFea; i++) {
-    printf("Processing Level L_%d\n", i + 1);
+    // printf("Processing Level Pattern_%d\n", i + 1);
     fsi_v1 = result[i -1]->head->next;
     if (fsi_v1 == NULL) {
-        printf("No more frequent itemsets at Level L_%d. Terminating.\n", i + 1);
+        printf("No more frequent itemsets at Level P_%d. Terminating.\n", i + 1);
         break;
     }
     fsi_set_cur = alloc_fsi_set();
 
-    // Iterate over all fsi_v1 in L_{k-1}
+    // Iterate over all fsi_v1 in P_{k-1}
     while (fsi_v1 != NULL) {
         fsi_v2 = fsi_v1->next;
         while (fsi_v2 != NULL) {
             // Join step
             if ((fea_v1 = join_check(fsi_v1, fsi_v2)) != -1) {
-                printf("Joining fsi_set with features:");
-                for(int f = 0; f < fsi_v1->fea_n; f++) printf(" %d", fsi_v1->feaset[f]);
-                printf(" and ");
-                for(int f = 0; f < fsi_v2->fea_n; f++) printf(" %d", fsi_v2->feaset[f]);
-                printf(" to form feature %d\n", fea_v1);
+                // printf("Joining fsi_set with features:");
+                // for(int f = 0; f < fsi_v1->fea_n; f++) printf(" %d", fsi_v1->feaset[f]);
+                // printf(" and ");
+                // for(int f = 0; f < fsi_v2->fea_n; f++) printf(" %d", fsi_v2->feaset[f]);
+                // printf(" to form feature %d\n", fea_v1);
 
                 // Create the candidate feature set by adding the new feature
                 fsi_v3 = add_fsi(fsi_v1, fea_v1);
 
                 // Prune step
                 if (i > 1 && !all_subsets_exist(result[i -1], fsi_v3)) {
-                    printf("Pruning candidate set with features:");
-                    for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
-                    printf("\n");
+                    // printf("Pruning candidate set with features:");
+                    // for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
+                    // printf("\n");
 
                     /* Update memory statistics */
                     stat_v.memory_v -= sizeof(fsi_t) + fsi_v3->fea_n * sizeof(FEA_TYPE);
@@ -93,15 +93,15 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 
                 // Support calculation
                 sup = comp_support(alg_opt, fsi_v3, numOfObj);
-                printf("Computed support for candidate set:");
-                for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
-                printf(" is %.5lf\n", sup);
+                // printf("Computed support for candidate set:");
+                // for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
+                // printf(" is %.5lf\n", sup);
 
                 if (sup >= min_sup) {
-                    printf("Adding candidate set to Level L_%d\n", i + 1);
+                    // printf("Adding candidate set to Level P_%d\n", i + 1);
                     add_fsi_set_entry(fsi_set_cur, fsi_v3);
                 } else {
-                    printf("Candidate set does not meet min_sup and is discarded.\n");
+                    // printf("Candidate set does not meet min_sup and is discarded.\n");
                     /* Update memory statistics */
                     stat_v.memory_v -= sizeof(fsi_t) + fsi_v3->fea_n * sizeof(FEA_TYPE);
                     /* Update memory statistics */
@@ -112,14 +112,14 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
             fsi_v2 = fsi_v2->next;
         }
 
-        // Move to the next fsi_v1 in L_{k-1}
+        // Move to the next fsi_v1 in P_{k-1}
         fsi_v1 = fsi_v1->next;
     }
 
 #ifndef WIN32
     GetCurTime(&query_end);
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("L_%d \ttime:%0.5lf\t fsi_n:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
+    printf("P_%d \ttime:%0.5lf\t # of colocation patterns:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
     GetCurTime(&query_sta);
 #endif
 
@@ -288,27 +288,25 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
             }
 
             if (flag || check_row_instance(alg_opt, fsi_v, obj_node_v->obj_v, RI)) {
-                if (cost_tag == 1)
-                    sup_C_f += 1; //each group is counted as 1
+                // if (cost_tag == 1)
+                sup_C_f += 1; //each group is counted as 1
             }
 
             obj_node_v = obj_node_v->next;
         }
 
-        if (cost_tag == 1)
-            sup_C_f = sup_C_f / (double)obj_set_v->obj_n;
+        // if (cost_tag == 1)
+        sup_C_f = sup_C_f / (double)obj_set_v->obj_n;
 
         // maintain the smallest one here
         if (sup_C_f <= sup) {
             sup = sup_C_f;
 
             // early stopping: sup of this fea set < threshold
-            if (cost_tag == 1 && sup < min_sup)
+            if (sup < min_sup)
                 break;
         }
     }
-    if (cost_tag == 2)
-        sup = sup / fea_highest_freq;
     fsi_v->sup = sup;
     delete[] RI;
 
@@ -337,7 +335,7 @@ bool check_row_instance(int alg_opt, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
         flag = combinatorial(fsi_v, obj_v, NULL, RI);
     } else // filter-and-verification
     {
-        flag = filter_and_verify(alg_opt - 40, fsi_v, obj_v, RI);
+        flag = filter_and_verify(alg_opt - 1, fsi_v, obj_v, RI);
     }
 
 #ifndef WIN32
@@ -557,7 +555,7 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
     bool feasibleflag3 = false;
 
 //---------------------------------------------------
-// Filter 2. feasiblility check in D(o,d) by N_o_f
+// Filter 2. feasiblility check in D(o,d) by NeighborCountWithinD
 
 #ifndef WIN32
     float sys_t, S1_t = 0;
@@ -642,7 +640,7 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
 }
 
 /*
- * Check whether all fea in @fsi_v > 0 in obj_v->N_o_f
+ * Check whether all fea in @fsi_v > 0 in obj_v->NeighborCountWithinD
  * @return
  * true: yes
  * false: no
@@ -653,7 +651,7 @@ bool check_Nof_feasibility(fsi_t* fsi_v, obj_t* obj_v)
         if (fsi_v->feaset[i] == obj_v->fea)
             continue;
 
-        if (obj_v->N_o_f[fsi_v->feaset[i] - 1] == 0) {
+        if (obj_v->NeighborCountWithinD[fsi_v->feaset[i] - 1] == 0) {
             // not found
             return false;
         }
@@ -662,7 +660,7 @@ bool check_Nof_feasibility(fsi_t* fsi_v, obj_t* obj_v)
 }
 
 /*
- * Check whether all fea in @fsi_v > 0 in obj_v->N_o_f2
+ * Check whether all fea in @fsi_v > 0 in obj_v->NeighborCountWithinHalfD
  * @return
  * true: yes
  * false: no
@@ -673,7 +671,7 @@ bool check_Nof2_feasibility(fsi_t* fsi_v, obj_t* obj_v)
         if (fsi_v->feaset[i] == obj_v->fea)
             continue;
 
-        if (obj_v->N_o_f2[fsi_v->feaset[i] - 1] == 0) {
+        if (obj_v->NeighborCountWithinHalfD[fsi_v->feaset[i] - 1] == 0) {
             // not found
             return false;
         }
@@ -706,8 +704,8 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
     // for each object
     for (int i = 0; i < data_v->obj_n; i++) {
         // data_v->obj_v[i].frac_f = new float[data_v->key_n]();
-        data_v->obj_v[i].N_o_f = new int[data_v->key_n]();
-        data_v->obj_v[i].N_o_f2 = new int[data_v->key_n]();
+        data_v->obj_v[i].NeighborCountWithinD = new int[data_v->key_n]();
+        data_v->obj_v[i].NeighborCountWithinHalfD = new int[data_v->key_n]();
     }
 
 // 	//*we iterate each object that contain frequent labels
@@ -723,8 +721,8 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
 			}
 		}
 		
-        map = data_v->obj_v[i].N_o_f;
-        map2 = data_v->obj_v[i].N_o_f2;
+        map = data_v->obj_v[i].NeighborCountWithinD;
+        map2 = data_v->obj_v[i].NeighborCountWithinHalfD;
 
         // 2. find all objects in range D(o,d)
         loc_v = get_obj_loc(&data_v->obj_v[i]);
@@ -749,6 +747,24 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
         release_obj_set(obj_set_v);
         release_loc(loc_v);
     }
+
+        // -----------------------------------------------------------
+    // OPTIONAL: Print out the arrays for debugging/inspection.
+    // -----------------------------------------------------------
+    // printf("\n--- Neighbor Count Information ---\n");
+    // for (int i = 0; i < data_v->obj_n; i++) {
+    //     printf("Object ID %d:\n", data_v->obj_v[i].id);
+    //     for (int f = 0; f < data_v->key_n; f++) {
+    //         int countD   = data_v->obj_v[i].NeighborCountWithinD[f];
+    //         int countD2  = data_v->obj_v[i].NeighborCountWithinHalfD[f];
+    //         // Print only if it's non-zero or if you want to see everything, remove the if.
+    //         if (countD > 0 || countD2 > 0) {
+    //             printf("  Feature %2d => Within D: %3d, Within D/2: %3d\n",
+    //                    f + 1, countD, countD2);
+    //         }
+    //     }
+    //     printf("\n");
+    // }
 
     release_k_list(k_head);
 }

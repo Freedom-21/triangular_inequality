@@ -1,9 +1,4 @@
 /*
- *	Author: Cheng Long
- *	Email: clong@cse.ust.hk
- */
-
-/*
  *	IR-tree.h defines the structures for implementing the IR-tree.
  *
  *	1. The "delete" operation of the IR-tree is not mentioned in the Cong et al.'s paper,
@@ -19,6 +14,7 @@
 #define IRTREE_H
 
 #include "bit_operator.h"
+// #include "data_struct_operation.h"
 #include "bst.h"
 #include "data_utility.h"
 #include "data_struct.h"

@@ -38,16 +38,16 @@ typedef struct obj
 
     FEA_TYPE    fea;
     
-  //  std::unordered_map<FEA_TYPE, int>* N_o_f; //storing feature count pair
+  //  std::unordered_map<FEA_TYPE, int>* NeighborCountWithinD; //storing feature count pair
     
     struct bst*      inverted_list;              //storing the inverted list in Disk(o,d)
     
-  //  std::unordered_map<FEA_TYPE, int>* N_o_f2; //storing feature count pair for D(o,d/2)
+  //  std::unordered_map<FEA_TYPE, int>* NeighborCountWithinHalfD; //storing feature count pair for D(o,d/2)
   
  //   std::unordered_map<FEA_TYPE, float>* frac_f; //storing fraction received
     
-    int* N_o_f;
-    int* N_o_f2;
+    int* NeighborCountWithinD;
+    int* NeighborCountWithinHalfD;
     float* frac_f;
 
     double* distance_bounds;
@@ -192,8 +192,8 @@ typedef struct tri
 typedef struct colocation_stat
 {
 	//cost.
-	B_KEY_TYPE	aver_cost;
-    float aver_size;
+	// B_KEY_TYPE	aver_cost;
+    // float aver_size;
 
 	//time.
 	float		q_time;
@@ -210,29 +210,29 @@ typedef struct colocation_stat
 	//float		data_memory_max;
 	
 	//algorithm related.
-	float		n_1_sum;
-	float		achi_sum;
+	// float		n_1_sum;
+	// float		achi_sum;
 
-	float		O_t_size_aver;
-	float		O_t_size_sum;
+	// float		O_t_size_aver;
+	// float		O_t_size_sum;
 
-	float		psi_n_aver;
-	float		psi_n_sum;
+	// float		psi_n_aver;
+	// float		psi_n_sum;
 
-	float		O_simp_size;
+	// float		O_simp_size;
 
 	//Cao-Exact specific.
-	float		node_set_n;
-	float		feasible_set_n;
+	// float		node_set_n;
+	// float		feasible_set_n;
 
 	//Cao-Appro2
-	float		n_k;
+	// float		n_k;
 
 	//Additional.
-	float		ratio_min;
-	float		ratio_max;
-	float		ratio_aver;
-	float		ratio_dev;
+	// float		ratio_min;
+	// float		ratio_max;
+	// float		ratio_aver;
+	// float		ratio_dev;
 
     //Method 4
     double       S1_sum;
