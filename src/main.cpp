@@ -1,8 +1,3 @@
-/*
- *	Author: Harry
- *	Email: khchanak@cse.ust.hk
- */
-
 #include "yoo_alg.h"
 #include "irtree.h"
 #include "frac.h"
@@ -10,10 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-// #include "SmallestEnclosingCircle.h"
 #include <cstddef>
 #include <cmath>
-// #include "stringgenc.h"
 
 using namespace std;
 using std::size_t;
@@ -26,33 +19,17 @@ colocation_stat_t stat_v;
 
 bool debug_mode = false;
 
-//----------------------------------
-//user parameter
 float dist_thr;
 float min_sup;
-// int cost_tag; //1= participation based; 2=fraction based
 double fea_highest_freq;
-
-//------------------------------------
-void colocation_patterns_support(int cost);
 
 void colocation();
 
 void build_IF(data_t* data_v);
 
-// void gen_syn();
-
-// double get_highest_freq(bst_node_t* bst_node_v);
-
-fsi_set_t* read_patterns();
-
 int main(int argc, char* argv[])
 {
-
-  //     batch_gen_syn_data2();
     colocation();
-
-//    colocation_patterns_support(3);
     return 0;
 }
 
@@ -72,12 +49,8 @@ void colocation()
     cfg = read_config_colocation();
     cfg->dim = 2;
 
-    // cost_tag = cfg->cost;
     dist_thr = cfg->dist_thr;
     min_sup = cfg->min_sup;
-  //  min_conf = cfg->min_conf;
-
-    //Read the data.
     printf("Reading data ...\n");
     data_v = read_data_colocation(cfg);
 
@@ -88,18 +61,10 @@ void colocation()
     GetCurTime(&IR_tree_sta);
 #endif
 
-    //Option 1: Build the tree from scratch.
-    //Build the IR-tree.
     if (cfg->tree_tag == 0) {
         printf("Building IR-tree ...\n");
         build_IRTree(data_v);
-
         print_and_check_tree(1, cfg->tree_file);
-        //check_IF( );
-    } else {
-        //Option 2: Read an existing tree.
-        printf("Reading IR-Tree ...\n");
-        read_tree(cfg->tree_file);
     }
 
 #ifndef WIN32
@@ -110,13 +75,11 @@ void colocation()
     //Build Inverted file
     build_IF(data_v);
 
-    //---
     if (cfg->alg_opt == 1) {
         printf("Redirected to the Joinless Algorithm with threshold prevalnce:%lf\n", min_sup);
     } else {
         printf("Redirected to the Improved Algorithm with threshold prevalnce:%lf\n", min_sup);
     }
-    //---
 
 #ifndef WIN32
 	
@@ -145,14 +108,11 @@ void colocation()
 
         printf("Query #%i ...\n\t", i + 1);
 
-        // result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr); // testing improved alone
-
         if (cfg->alg_opt == 1) {
             result = joinless_mining(data_v, cfg->obj_n, cfg->key_n);
         } else if (cfg->alg_opt == 2) {
             result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr);
         }else {
-            // Invalid alg_opt: Print error message and stop execution
             exit(EXIT_FAILURE);  
         }
 
@@ -175,9 +135,9 @@ void colocation()
                 exit(0);
             }
 
-			fclose(r_fp);
-			//fclose(r_fp2);
+            print_fsi_set(result, cfg->key_n, r_fp);
 
+			fclose(r_fp);
         }
         //release the result memory
         for (int k = 0; k < cfg->key_n; k++)
@@ -202,9 +162,6 @@ void colocation()
     free(cfg);
 }
 
-/*
- * Construct the inverted file @IF_v based on the data
- */
 void build_IF(data_t* data_v)
 {
 
@@ -214,9 +171,7 @@ void build_IF(data_t* data_v)
 
     //Insert all the objects to construct the IF
     for (int i = 0; i < data_v->obj_n; i++) {
-        //        if(i%100==0)
         {
-
             bst_node_v = bst_search(IF_v, data_v->obj_v[i].fea);
 
             if (bst_node_v != NULL) {

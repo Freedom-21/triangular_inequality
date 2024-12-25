@@ -1,9 +1,3 @@
-
-/*
- *	Author: Cheng Long
- *	Email: clong@cse.ust.hk
- */
-
 #include "data_utility.h"
 #include "irtree.h"
 
@@ -126,40 +120,6 @@ void add_keyword_entry(k_node_t*& k_node_v, KEY_TYPE key)
         stat_v.memory_max = stat_v.memory_v;
     /*s*/
 }
-
-/*
- *	Copy the k_list info of @k_head2 to @k_head1.
- */
-// void copy_k_list(k_node_t* k_head1, k_node_t* k_head2)
-// {
-//     k_node_t *k_node_iter1, *k_node_iter2;
-
-//     k_node_iter1 = k_head1;
-//     k_node_iter2 = k_head2->next;
-//     while (k_node_iter2 != NULL) {
-//         add_keyword_entry(k_node_iter1, k_node_iter2->key);
-
-//         k_node_iter2 = k_node_iter2->next;
-//     }
-// }
-
-/*
- *	Print the a list of keywords @k_head in @o_fp.
- */
-// void print_k_list(k_node_t* k_head, FILE* o_fp)
-// {
-//     k_node_t* k_node_iter;
-
-//     k_node_iter = k_head->next;
-//     while (k_node_iter != NULL) {
-//         fprintf(o_fp, "%.0lf  ", k_node_iter->key);
-
-//         k_node_iter = k_node_iter->next;
-//     }
-
-//     fprintf(o_fp, "\n");
-// }
-
 /****
  *	Print the location @k_head in @o_fp.
  ****/
@@ -314,11 +274,6 @@ data_t* read_data_colocation(colocation_config_t* cfg)
     data_v->dim = cfg->dim;
     data_v->key_n = cfg->key_n;
 
-    //data_v->key_freq_v = bst_ini( );
-
-    ///--------------------------------------------------
-    //Read the loc info.
-    /// from the loc file
     if ((i_fp = fopen(cfg->loc_file, "r")) == NULL) {
         fprintf(stderr, "Cannot open the loc file.\n");
         exit(0);
@@ -334,11 +289,9 @@ data_t* read_data_colocation(colocation_config_t* cfg)
             data_v->obj_v[i].MBR[j].max = data_v->obj_v[i].MBR[j].min;
         }
     }
-
     fclose(i_fp);
-    ///--------------------------------------------------
-    //Read the keywords info.
-    ///from the doc file
+
+    //Read the IDs info.
     if ((i_fp = fopen(cfg->doc_file, "r")) == NULL) {
         fprintf(stderr, "Cannot open the doc file.\n");
         exit(0);

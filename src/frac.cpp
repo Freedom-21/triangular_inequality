@@ -47,7 +47,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
     GetCurTime(&query_end);
 
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("P_1 \ttime:%0.5lf\n", usr_t);
+    printf("Pattern_1 \ttime:%0.5lf\n", usr_t);
     GetCurTime(&query_sta);
 #endif
 
@@ -119,7 +119,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 #ifndef WIN32
     GetCurTime(&query_end);
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("P_%d \ttime:%0.5lf\t # of colocation patterns:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
+    printf("Pattern_%d \ttime:%0.5lf\t # of colocation patterns:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
     GetCurTime(&query_sta);
 #endif
 

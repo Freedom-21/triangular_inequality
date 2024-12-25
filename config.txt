@@ -1,1 +1,1 @@
-2	94028	syn_loc.txt	462	syn_doc.txt	0	syn_tree.txt	1	0.5	10
+2	12	paper_loc.txt	3	paper_id.txt	0	paper_tree.txt	1	0.1	3.2

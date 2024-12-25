@@ -8,25 +8,6 @@
 #include "irtree.h"
 
 
-/*
- *	1. The bitwise operations are based on the "BIT_TYPE type",
- *	which has 4 bytes.
- *
- *	2. It is possible to extend the number of bits to 64 bits.
- */
-
-#include <math.h>
-//#include <stdint.h>
-
-
-int get_k_bit( BIT_TYPE v, int k);
-
-void insert_k_bit( BIT_TYPE &v, int k);
-
-void delete_k_bit( BIT_TYPE &v, int k);
-
-void union_bit( BIT_TYPE &v1, BIT_TYPE v2);
-
 /* ------------------------- create/add/release  ------------------------- */
 
 fsi_t* alloc_fsi( int key_n);

@@ -425,87 +425,6 @@ void PickSeeds( node_t* pnode, range* MBR, int& g1, int& g2)
 }
 
 /*
-* LinearPickSeeds is used to pick the seeds for 'LinearSplit' function.
-* 
-* With the same interface as 'PickSeeds'.
-*/
-void LinearPickSeeds( node_t* pnode, range* MBR, int& g1, int& g2)
-{
-	//double aTmp, maxArea = -1;
-	float lowHighSide, highLowSide, width, sep, sep_max;
-	int i, j, gTmp1, gTmp2;
-	range *rTmp, *MBR0;
-
-	//Get the MBR of pnode, which is used for normalizing the separation.
-	MBR0 = ( range*)malloc( IRTree_v.dim * sizeof( range));
-	memset( MBR0, 0, sizeof( IRTree_v.dim * sizeof( range)));
-
-	calc_MBR( pnode, MBR0);
-	
-	//
-	sep_max = 0;
-	for( i=0; i<IRTree_v.dim; i++)
-	{	
-		//Travel each dimension.
-		lowHighSide = FLT_MAX;
-		highLowSide = -FLT_MAX;
-
-		//Find two MBRanges with the "highest lower side" and 
-		//the "lowest higher side", respectively.
-		rTmp = MBR;
-		for( j=-1; j<pnode->num; )
-		{
-			if( rTmp[i].max < lowHighSide)
-			{
-				gTmp1 = j;
-				lowHighSide = rTmp[i].max;
-			}
-
-			if( rTmp[i].min > highLowSide)
-			{
-				gTmp2 = j;
-				highLowSide = rTmp[i].min;
-			}
-
-			rTmp = pnode->MBRs[ ++j];
-		}
-		
-		if( gTmp1 == gTmp2) 
-		{
-			//The two entries correspond to the same MBR;
-			//Randomly pick another entry.
-			if( gTmp1 < pnode->num-1)
-				gTmp2 = gTmp1 + 1;
-			else
-				gTmp2 = gTmp1 - 1;
-		}
-
-		//Calculate the sepration between MBR1 and MBR2 along dim i.
-		sep = fmax( highLowSide, lowHighSide) -
-			  fmin( highLowSide, lowHighSide);
-
-		//Recloc the normalized separation.
-		width = fmax( MBR0[ i].max, MBR[ i].max) -
-				fmin( MBR0[ i].min, MBR[ i].min);
-		sep /= width;
-
-		if( sep > sep_max)
-		{
-			sep_max = sep;
-			g1 = gTmp1;
-			g2 = gTmp2;
-		}
-		
-		//No tie handling for sep == sep_max here.		
-	}
-
-	//Release the resource.
-	free( MBR0);
-
-	return;
-}
-
-/*
 * PickNext is used to pick the new item to be grouped.
 * 
 *  pnode is the node to split.
@@ -582,42 +501,6 @@ int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, ra
 }
 
 /*
-* LinearPickNext has the same function as 'PickNext' except that it picks the next entry randomly.
-*
-* The same interface as "PickNext".
-*
-*/
-int LinearPickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, bool* done, int rTag)
-{
-	int i, next;
-
-	//
-	if( rTag == 0)
-	{
-		next = -1;
-	}
-	else
-	{
-		for(i=0; i<pnode->num; i++)
-		{
-			if( done[i] == false)
-			{
-				next = i;
-				break;
-			}
-		}
-	}//else
-	
-	//
-	if( node_1->num > node_2->num)
-		node_c = node_1;
-	else
-		node_c = node_2;
-	
-	return next;
-}
-
-/*
  *	Assigne an entry to a node.
  *
  *	pnode involves the 'level' info.
@@ -680,10 +563,10 @@ void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 		MBR =( ( obj_t*)obj)->MBR;
 	}
 
-	if( opt == 1)
-		LinearPickSeeds( pnode, MBR, g1, g2);
-	else
-		PickSeeds( pnode, MBR, g1, g2);
+	// if( opt == 1)
+	// 	LinearPickSeeds( pnode, MBR, g1, g2);
+	// else
+	PickSeeds( pnode, MBR, g1, g2);
 	
 	//Assign the two entries indicated by g1, g2.
 	if( g1 == -1)    //obj
@@ -725,10 +608,10 @@ void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 		}
 
 		//PickNext.
-		if( opt == 1)
-			next = LinearPickNext( pnode, node_1, node_2, node_c, done, rTag);
-		else
-			next = PickNext( pnode, node_1, node_2, node_c, MBR, done, rTag);
+		// if( opt == 1)
+		// 	next = LinearPickNext( pnode, node_1, node_2, node_c, done, rTag);
+		// else
+		next = PickNext( pnode, node_1, node_2, node_c, MBR, done, rTag);
 
 		//Assign the 'next' entry.
 		if( next == -1)	//the 'next' is obj.
@@ -827,10 +710,6 @@ node_t* CreateNewRoot( node_t* node_1, node_t* node_2)
 
 	const_IF( nRoot);
 
-/*t/
-	print_IF( nRoot);
-/*t*/
-
 	IRTree_v.inner_n ++;
 
 	return nRoot;
@@ -881,10 +760,6 @@ node_t* InsertSub( node_t* pnode, void* obj)
 		//Update the IF information.
 		adjust_IF( pnode, obj, pnode->num - 1);
 
-/*t/	
-		print_IF( pnode);
-/*t*/
-
 		return NULL;
 
 	}//pnode->num < IRTree_v.
@@ -904,17 +779,6 @@ node_t* InsertSub( node_t* pnode, void* obj)
 		//Construct the IFs for the newly-created nodes.
 		const_IF( pnode);
 		const_IF( node_2);
-/*t/
-		int i;
-		for( i=0; i<pnode->num; i++)
-			print_MBR( pnode->MBRs[ i], IRTree_v.dim);
-		for( i=0; i<node_2->num; i++)
-			print_MBR( node_2->MBRs[ i], IRTree_v.dim);
-/*t*/
-/*t/
-		print_IF( pnode);
-		print_IF( node_2);
-/*t*/
 
 		//Insert the split node recursively.
 		if( pnode->parent == NULL)
@@ -1223,8 +1087,6 @@ void CondenseTree( node_t* pnode)
 	eTag2 = h2->next;
 	while( h2 != NULL)
 	{
-//		if( R_TREE_OR_R_STAR_TREE)	//R-tree.
-//		{
 			node_t* inNode, *res;
 
 			ChooseInner( IRTree_v.root, h2->p, inNode);
@@ -1235,9 +1097,6 @@ void CondenseTree( node_t* pnode)
 				IRTree_v.root = res;
 				IRTree_v.height ++;
 			}
-//		}
-//		else						//R*-tree.
-//			RStarInsert( h2->p, h2->p->level+1);
 
 		free(h2);
 
@@ -1467,104 +1326,7 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 	return true;
 }
 
-/*
- *	Un-set attributes: child and parent.
- */
-void read_node( FILE* i_fp, node_t* node_v)
-{
-	int i, j;
-	B_KEY_TYPE key;
-	float tmp_1, tmp_2;
-	char tmp_c;
-	char des[ MAX_LINE_LENG];
-	bst_node_t* bst_node_v;
 
-	//CreateNode( node_v);
-
-	/*Only applied to WIN32.
-	//fgets( des, MAX_LINE_LENG, i_fp);	//blank line.
-	//fgetc( i_fp);
-	fgets( des, MAX_LINE_LENG, i_fp);
-	//fscanf( i_fp, "\n");
-	fscanf( i_fp, "%i%i%i", &node_v->num, &node_v->level, &node_v->loc);
-	fgets( des, MAX_LINE_LENG, i_fp);
-	fgets( des, MAX_LINE_LENG, i_fp);
-	*/
-
-	fscanf( i_fp, "%i%i%i", &node_v->num, &node_v->level, &node_v->loc);
-
-	/*t/
-	printf( "%i\t%i\t%i\t", node_v->num, node_v->level, node_v->loc);
-	/*t*/
-
-	for( i=0; i<2+node_v->num+2; i++)
-	{
-		fscanf( i_fp, "%s", des);
-		/*t/
-		printf( "%s\t", des);
-		/*t*/
-	}
-	//printf( "\n");
-	
-	//Read the MBR info.
-	for( i=0; i<node_v->num; i++)
-	{
-		node_v->MBRs[ i] = ( range*)malloc( sizeof( range));
-		memset( node_v->MBRs[ i], 0, sizeof( range));
-	}
-	
-	for( j=0; j<IRTree_v.dim; j++)
-	{
-		for( i=0; i<node_v->num; i++)
-		{
-			fscanf( i_fp, "%f%f", &node_v->MBRs[ i][j].min, &node_v->MBRs[ i][j].max);
-			/*t/
-			printf( "%f\t%f\t", node_v->MBRs[ i][j].min, node_v->MBRs[ i][j].max);
-			/*t*/
-		}
-		fscanf( i_fp, "%f%f", &tmp_1, &tmp_2);
-		/*t/
-		printf( "%f\t%f\n", tmp_1, tmp_2);
-		/*t*/
-	}
-
-	//Read the IF info.
-	fscanf( i_fp, "%lf", &key);
-	while( key != -1)
-	{
-		/*t/
-		if( key == 316)
-			printf( "");
-		/*t*/
-
-		fscanf( i_fp, "%c", &tmp_c);
-
-		bst_node_v = ( bst_node_t*)malloc( sizeof( bst_node_t));
-		memset( bst_node_v, 0, sizeof( bst_node_t));
-
-		bst_node_v->key = key;
-
-		fscanf( i_fp, "%u", &bst_node_v->p_list);
-
-		/*t/
-		printf( "%.0lf\t%u\n", key, bst_node_v->p_list);
-		/*t*/
-
-		bst_insert( node_v->bst_v, bst_node_v);
-
-		fscanf( i_fp, "%lf", &key);
-
-		/*s*/
-		stat_v.tree_memory_v += sizeof( bst_node_v);
-		if( stat_v.tree_memory_v > stat_v.tree_memory_max)
-			stat_v.tree_memory_max = stat_v.tree_memory_v;
-		/*s*/		
-	}
-}
-
-/*
- *
- */
 obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
 {
 	int tag;
@@ -1578,11 +1340,6 @@ obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
 	//id & MBr attributes.
 	obj_v->id = id_cnt++;
 	obj_v->MBR = node_v->MBRs[ loc];
-
-	//Initialize the k_head attribute.
-	//obj_v->k_head = ( k_node_t*)malloc( sizeof( k_node_t));
-	//memset( obj_v->k_head, 0, sizeof( k_node_t));
-	//k_node_v = obj_v->k_head;
 
 	tag = 0;
 	x = node_v->bst_v->root;
@@ -1598,165 +1355,6 @@ obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
 	}
 
 	return obj_v;
-}
-
-
-/*
- *	Read the IR-tree from the file SAVE_FILE.
- *	The required file is the output file of "print_and_check_tree".
- */
-void read_tree( char* ir_tree_f)
-{
-	int i, j, inner_node_n, leaf_node_n, obj_n, dim, sta, rear, id_cnt, tmp;
-	char des[ MAX_LINE_LENG];
-	FILE* i_fp;
-	node_t** queue;
-	node_t* c_node, *n_node;
-	obj_t* obj_v;
-
-	if( ( i_fp = fopen( ir_tree_f, "r")) == NULL)
-	{
-		printf( "The ir_tree_f cannot open.\n");
-		exit( 0);
-	}
-
-	/*Only applied to WIN32.
-	fgets( des, MAX_LINE_LENG, i_fp);				//line 1.
-	fgets( des, MAX_LINE_LENG, i_fp);				//line 2.
-	fscanf( i_fp, "%i%i%i%i%i%i", &tmp, &tmp, &inner_node_n, &leaf_node_n, &obj_n, &dim);	//line 3.
-	fgets( des, MAX_LINE_LENG, i_fp);				//line 4.
-	fgets( des, MAX_LINE_LENG, i_fp);				//line 5.
-	*/
-
-	for( i=0; i<8; i++)
-	{
-		fscanf( i_fp, "%s", des);
-		/*t/
-		printf( "%s\t", des);
-		/*t*/
-	}
-	//printf( "\n");
-
-	fscanf( i_fp, "%i%i%i%i%i%i", &tmp, &tmp, &inner_node_n, &leaf_node_n, &obj_n, &dim);	//line 3.
-
-	/*t/
-	printf( "%i\t%i\t%i\t%i\t%i\t%i\t", tmp, tmp, inner_node_n, leaf_node_n, obj_n, dim);	
-	/*t*/
-
-	for( i=0; i<5; i++)
-	{
-		fscanf( i_fp, "%s", des);
-		/*t/
-		printf( "%s\t", des);
-		/*t*/
-	}
-	//printf( "\n");
-
-	queue = ( node_t**)malloc( inner_node_n * sizeof( node_t*));
-	memset( queue, 0, inner_node_n * sizeof( node_t*));
-
-	sta = 0;
-	rear = -1;
-	id_cnt = 1;
-
-	//Initialize the IR-tree.
-	ini_tree( );
-	IRTree_v.dim = dim;
-
-	IRTree_v.leaf_n = 0;	//bug.
-
-	/*
-	IRTree_v.inner_n = inner_node_n;
-	IRTree_v.leaf_n = leaf_node_n;
-	IRTree_v.obj_n = obj_n;
-	*/
-
-	//Read the root node.
-	read_node( i_fp, IRTree_v.root);
-	IRTree_v.root->parent = NULL;
-	if( IRTree_v.root->level > 0)
-	{
-		//
-		queue[ ++rear] = IRTree_v.root;
-		IRTree_v.inner_n ++;
-	}
-	else
-	{
-		//The root is a leaf node.
-		//Create the corresponding the objects.
-		for( i=0; i<IRTree_v.root->num; i++)
-		{
-			obj_v = const_obj( IRTree_v.root, i, id_cnt);
-			
-			IRTree_v.root->child[ i] = obj_v;
-		}			
-
-		IRTree_v.leaf_n ++;
-		IRTree_v.obj_n += IRTree_v.root->num;
-	}
-
-	while( sta <= rear)
-	{
-		c_node = queue[ sta++];
-		
-		/*t/
-		printf( "sta: %i\n", sta);
-		/*t*/
-		/*t/
-		if( sta == 5)
-			printf( "");
-		/*t*/
-
-		//Read the node info.
-		for( i=0; i<c_node->num; i++)
-		{
-			CreateNode( n_node);
-
-			//fgets( des, MAX_LINE_LENG, i_fp);
-
-			read_node( i_fp, n_node);
-			
-			n_node->parent = c_node;
-			c_node->child[ i] = n_node;
-
-			//Put n_node into the queue if n_node is an inner-node.
-			if( n_node->level > 0)
-			{
-				queue[ ++rear] = n_node;
-
-				IRTree_v.inner_n ++;
-			}
-			else
-			{
-				//n_node is a leaf-node.
-				//Create the objects.
-				for( j=0; j<n_node->num; j++)
-				{
-					obj_v = const_obj( n_node, j, id_cnt);
-
-					n_node->child[ j] = obj_v;
-				}
-
-				IRTree_v.leaf_n ++;
-				IRTree_v.obj_n += n_node->num;
-
-				/*t/
-				if( IRTree_v.leaf_n == 1113)
-					printf( "");
-				/*t*/
-			}
-		}//for
-	}//while
-
-	if( IRTree_v.leaf_n != leaf_node_n)
-		printf( "Leaf node number inconsistency..\n");
-	if( IRTree_v.inner_n != inner_node_n)
-		printf( "Inner node number inconsistency..\n");
-	if( IRTree_v.obj_n != obj_n)
-		printf( "Object number inconsistency..\n");
-
-	free( queue);
-	fclose( i_fp);
 }
 
 /*---------------------Added APIs-2011-03-09------------------------*/
@@ -1777,213 +1375,11 @@ void build_IRTree( data_t* data_v)
 	//Insert all the objects to construct the IR-tree.
 	for( i=0; i<data_v->obj_n; i++)
 	{
-      //  if(i%10000==0){
-      //      printf("\n===%d===\n",i);
-      //  }
         Insert(data_v->obj_v + i);
-//        printf("%d\t",(data_v->obj_v + i)->id);
+        // printf("%d\t",(data_v->obj_v + i)->id);
 		IRTree_v.obj_n ++;
 	}
 }
-
-/*
- *	Release the sub-tree rooted at node_v.
- */
-void free_IRTree_sub( node_t* node_v)
-{
-	int i;
-
-	if( node_v == NULL)
-		return;
-	
-	if( node_v->level > 0)
-	{
-		for( i=0; i<node_v->num; i++)
-			free_IRTree_sub( ( node_t*)( node_v->child[ i]));
-	}
-
-	ReleaseNode( node_v, 1);
-}
-
-/*
- *	Re-implementation of free_IRTree.
- *
- *	Method: DFS.
- */
-void free_IRTree( )
-{
-	free_IRTree_sub( IRTree_v.root);
-}
-
-/*
- *	Check whether the @loc's entry of @node_v contains the @key.
- */
-bool loc_to_key( int loc, int key, node_t* node_v)
-{
-	k_node_t* k_node_v;
-	bst_t* bst_v;
-
-	if( node_v->level == 0)
-	{
-        //k_node_v = ( ( obj_t*)( node_v->child[ loc]))->k_head->next;
-        //while( k_node_v != NULL)
-       // {
-         //   if( k_node_v->key == key)
-           //     return true;
-            
-         //   k_node_v = k_node_v->next;
-       // }
-
-        if ( (( obj_t*)( node_v->child[ loc]))->fea == key)
-            return true;
-		return false;
-	}
-	else	//node_v->level > 0
-	{
-		bst_v = ( ( node_t*)( node_v->child[ loc]))->bst_v;
-		if( bst_search( bst_v, key) != NULL)
-			return true;
-		else
-			return false;
-	}
-}
-
-/*
- *	Check for each loc entry of a node @node_v,
- *	whether it is included in the posting list of each key it covers.
- *
- *	That is, check the correctness of each entry of the IF corresponding @node_v.
- */
-bool loc_oriented_check( node_t* node_v)
-{
-	int i, loc, tag;
-	KEY_TYPE key;
-	bst_node_t* x;
-
-	tag = 0;
-	x = node_v->bst_v->root;
-
-	while( get_next_in_order( x, tag))
-	{
-		//For a specific IF entry (a specific keyword x->key).
-		key = x->key;
-
-		for( i=0; i<node_v->num; i++)
-		{
-			if( get_k_bit( x->p_list, i))
-			{
-				loc = i;
-
-				if( !loc_to_key( loc, ( int)key, node_v))
-					return false;
-			}
-		}
-
-		if( !in_order_sub( x, tag))
-			break;
-	}	
-
-	return true;
-}
-
-/*
- *	Check whether the @loc in the posting list of @key is valid.
- */
-bool key_to_loc( int key, int loc, node_t* node_v)
-{
-	bst_node_t* bst_node_v;
-
-	bst_node_v = bst_search( node_v->bst_v, key);
-	if( bst_node_v == NULL)
-		return false;
-
-	if( !get_k_bit( bst_node_v->p_list, loc))
-		return false;
-
-	//Have passed all the checks.
-	return true;
-}
-
-/*
- *	Check whether the keyword information of each loc entry
- *	is captured in the IF of the node.
- */
-bool key_oriented_check( node_t* node_v)
-{
-	int i, loc, key;
-	k_node_t* k_head, *k_node_v;
-
-	for( i=0; i<node_v->num; i++)
-	{
-		if( node_v->level == 0)
-		{
-			//k_head = ( ( obj_t*)( node_v->child[ i]))->k_head;			
-			//k_head = collect_keywords_list( ( ( obj_t*)( node_v->child[ i]))->k_head);
-            
-            k_head = collect_keywords_fea( ( ( obj_t*)( node_v->child[ i]))->fea);
-		}
-		else	//node_v->level > 0
-		{
-			k_head = collect_keywords_bst( ( ( node_t*)( node_v->child[ i]))->bst_v);
-		}
-
-		k_node_v = k_head->next;
-		while( k_node_v != NULL)
-		{
-			key = ( int)k_node_v->key;
-			loc = i;
-
-			//key_to_loc check.
-			if( !key_to_loc( key, loc, node_v))
-			{
-				release_k_list( k_head);
-				return false;
-			}
-
-			k_node_v = k_node_v->next;
-		}
-	}
-
-	//Have passed all checks.
-	return true;
-}
-
-/*
- *	[Recursive] The subprocedure of check_IF.
- */
-bool check_IF_sub( node_t* node_v)
-{
-	bool res;
-	int i;
-
-	res = loc_oriented_check( node_v) && key_oriented_check( node_v);
-
-	if( res && node_v->level > 0)
-	{
-		for( i=0; i<node_v->num; i++)
-		{
-			res = loc_oriented_check( ( node_t*)( node_v->child[ i])) &&
-					key_oriented_check( ( node_t*)( node_v->child[ i]));
-			
-			if( !res)
-				break;
-		}
-	}
-
-	return res;
-}
-
-/*
- *	Check the consistency of the IF info of the IR-tree.
- */
-void check_IF( )
-{
-	if( !check_IF_sub( IRTree_v.root))
-	{
-		printf( "====IF Inconsistency!\n");
-	}
-}
-
 /*
  *	Print the IF information of a node.
  */
@@ -2020,54 +1416,6 @@ void print_IF( node_t* node_v, FILE* fp, int p_tag)
 			break;
 	}
 	fprintf( fp, "-1\n");
-}
-
-/*
- *	Print a MBR.
- */
-void print_MBR( range* MBR, int dim)
-{
-	int i;
-
-	for( i=0; i<dim; i++)
-	{
-		printf( "%.2f\t%.2f\n", MBR[ i].min, MBR[ i].max);
-	}
-	printf( "\n");
-}
-
-/*
-*	test_IRTree verifies newly-added functions related IR-tree.
-*/	
-void test_IRTree( int o_tag)
-{
-	IRTree_config_t* cfg;
-	data_t* data_v;
-
-	//Read the configuration info.
-	cfg = read_config_irtree( );
-
-	//Read the data.
-	data_v = read_data_irtree( cfg);
-
-	//Build the IR-tree.
-	printf( "Building the IR-tree ...\n");
-	build_IRTree( data_v);
-
-	//Check the IR-tree.
-	check_IF( );
-
-	//Saving the IR-tree.
-	printf( "Saving the IR-tree ...\n");
-	print_and_check_tree( o_tag, SAVE_FILE);
-
-	//Release the IR-tree.
-	printf( "Releasing the IR-tree ...\n");
-	free_IRTree( );
-	
-	//Release the related the resources.
-	free( cfg);
-	release_data( data_v);
 }
 
 /*---------------------IR-tree augmentation APIs------------------------*/
@@ -2148,35 +1496,10 @@ k_node_t* collect_keywords_fea(FEA_TYPE fea)
     
     k_node_v1 = k_node_v;
     
-//    k_node_v2 = k_head->next;
-//    while( k_node_v2 != NULL)
-//    {
-//        add_keyword_entry( k_node_v1, k_node_v2->key);
-//
-//        k_node_v2 = k_node_v2->next;
-//    }
     add_keyword_entry( k_node_v1, fea);
     
     return k_node_v;
 }
-
-/*
- *	Release a k_node_t list.
- *
-void release_k_list( k_node_t* k_head)
-{
-	k_node_t* k_node_v1, *k_node_v2;
-
-	k_node_v1 = k_head;
-	while( k_node_v1->next != NULL)
-	{
-		k_node_v2 = k_node_v1->next;
-		free( k_node_v1);
-
-		k_node_v1 = k_node_v2;
-	}
-	free( k_node_v1);
-}*/
 
 /*
  *
@@ -2302,27 +1625,21 @@ void const_IF( node_t* node_v)
 	int loc;
 	k_node_t* k_node_v, *k_node_v1;
 	
-	//
 	for( loc=0; loc<node_v->num; loc++)
 	{
 		if( node_v->level == 0)
         {
-            //k_node_v = collect_keywords_list( ( ( obj_t*)( node_v->child[ loc]))->k_head);
             k_node_v = collect_keywords_fea( ( ( obj_t*)( node_v->child[ loc]))->fea);
         }else	//
 			k_node_v = collect_keywords_bst( ( ( node_t*)( node_v->child[ loc]))->bst_v);
-
 		k_node_v1 = k_node_v->next;
 		while( k_node_v1 != NULL)
 		{
 			add_IF_entry( node_v->bst_v, k_node_v1->key, loc);
-
 			k_node_v1 = k_node_v1->next;
 		}
         release_k_list( k_node_v);
 	}
-
-
 }
 
 /*
@@ -2341,7 +1658,6 @@ void delete_IF_loc( bst_t* bst_v, int loc)
 	while( get_next_in_order( x, tag))
 	{
 		delete_k_bit( x->p_list, loc);
-
 		if( !in_order_sub( x, tag))
 			break;
 	}
@@ -2364,56 +1680,4 @@ void adjust_parent_IF( node_t* p_node, int loc)
 
 	//Adjust the IFs of p_node and its ancestors.
 	adjust_IF( p_node, ( void*)( p_node->child[ loc]), loc);
-}
-
-/*
- *	Prepare the IR-trees.
- */
-void gen_irtree( )
-{
-	int ins_n, target;
-	IRTree_config_t cfg;
-	FILE* c_fp;
-	data_t* data_v;
-
-	if( ( c_fp = fopen( GEN_IRTREE_CONFIG, "r")) == NULL)
-	{
-		printf( "The gen_irtree_config.txt file cannot open!\n");
-		exit( 0);
-	}
-
-	printf( "Input the target instance:\n");
-	scanf( "%i", &target);
-
-	ins_n = 1;
-	while( fscanf( c_fp, "%s%s%s", cfg.loc_file, cfg.doc_file, cfg.tree_file) != EOF)
-	{	
-		//Read the config.
-		fscanf( c_fp, "%i%i", &cfg.obj_n, &cfg.key_n);
-		fscanf( c_fp, "%i%i", &cfg.dim, &cfg.split_opt);
-
-		if( ins_n != target)
-		{
-			ins_n ++;
-			continue;
-		}
-
-		printf( "The target tree file: %s\n", cfg.tree_file);
-
-		//Read the data.
-		data_v = read_data_irtree( &cfg);
-
-		//Build the tree.
-		build_IRTree( data_v);
-
-		//Print the tree.
-		print_and_check_tree( 1, cfg.tree_file);
-		
-		//Release the resources.
-		release_data( data_v);
-
-		break;
-	}
-
-	fclose( c_fp);
 }

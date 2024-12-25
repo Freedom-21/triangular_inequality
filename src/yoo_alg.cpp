@@ -5,6 +5,8 @@
  */
 fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
 {
+    printf("Starting Joinless Algorithm with, objects=%d, Features=%d, dist_thr=%.5f\n", numOfObj, numOfFea, dist_thr);
+
     unordered_map<FEA_TYPE, vector<obj_set_t*>*> SN;
 
     fsi_set_t** result; //storing overall result
@@ -46,7 +48,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
     GetCurTime(&query_end);
 
     GetTime(&query_sta, &query_end, &usr_t, &sys_t);
-    printf("P_1 time:%0.5lf\t\n", usr_t);
+    printf("Pattern_1 \ttime:%0.5lf\n", usr_t);
     GetCurTime(&query_sta);
 #endif
     //L_(i+1)
@@ -134,7 +136,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
         /*t*/
         //print out each level for debug
         if (debug_mode) {
-            printf("L_%d\n", i + 1);
+            printf("P_%d\n", i + 1);
             int cnt = 0;
             fsi_t* fsi_v = fsi_set_cur->head->next;
             while (fsi_v != NULL) {

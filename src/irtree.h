@@ -1,15 +1,3 @@
-/*
- *	IR-tree.h defines the structures for implementing the IR-tree.
- *
- *	1. The "delete" operation of the IR-tree is not mentioned in the Cong et al.'s paper,
- *	since this operation is not used in their algorithms.
- *	In our implementation, this operation has been implemented.
- *
- *	2. Possible ways for implementing the "delete" operatoin:
- *	When an obj/sub-tree is removed, maintain the set of keywords 
- *	that contained in this obj/sub-tree but not contained by other entries of the same node.
- */
-
 #ifndef IRTREE_H
 #define IRTREE_H
 
@@ -118,10 +106,6 @@ int LinearPickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node
 void AssignEntry( node_t* pnode, node_t* node_c, void* obj, range* MBR);
 
 void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt);
-
-//void QuadraticSplit( node_t* &pnode, node_t* &node_2, void* obj);
-
-//void LinearSplit( node_t* &pnode, node_t* &node_2, void* obj);
 
 void AdjustTree( node_t* pnode);
 

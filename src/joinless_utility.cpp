@@ -1,11 +1,4 @@
-
-/*
- *	Author: Cheng Long
- *	Email: clong@cse.ust.hk
- */
-
 #include "joinless_utility.h"
-
 
 /*
  *	Allocate a loc_t structure.
@@ -144,14 +137,8 @@ void release_psi( psi_t* psi_v)
 query_t* alloc_query( )
 {
 	query_t* q;
-
 	q = ( query_t*)malloc( sizeof( query_t));
 	memset( q, 0, sizeof( query_t));
-
-	//q->loc_v = alloc_loc( dim);
-
-	//q->psi_v = alloc_psi( );
-
 	return q;
 }
 
@@ -560,38 +547,6 @@ bool is_relevant_obj( obj_t* obj_v, query_t* q)
 }
 
 /*
- *	Check whether the keywords in the query @q are covered by a set of objs in @obj_set_v.
- */
-// bool is_covered_obj_set( obj_set_t* obj_set_v, query_t* q)
-// {
-// 	KEY_TYPE key;
-// 	k_node_t* k_node_iter;
-// 	obj_node_t* obj_node_iter;
-
-// 	k_node_iter = q->psi_v->k_head->next;
-// 	while( k_node_iter != NULL)
-// 	{
-// 		key = k_node_iter->key;
-
-// 		obj_node_iter = obj_set_v->head->next;
-// 		while( obj_node_iter != NULL)
-// 		{
-// 			if( has_key_obj( obj_node_iter->obj_v, key))
-// 				break;
-
-// 			obj_node_iter = obj_node_iter->next;
-// 		}
-
-// 		if( obj_node_iter == NULL)
-// 			return false;
-
-// 		k_node_iter = k_node_iter->next;
-// 	}
-	
-// 	return true;
-// }
-
-/*
  *	Check whether the sub-tree rooted at a node @node_v
  *	contains a keyword @key.
  *
@@ -776,8 +731,6 @@ void retrieve_sub_tree( node_t* node_v, obj_set_t* &obj_set_v, query_t* q)
 
 	if( node_v->level == 0)
 	{
-		//node_v is a leaf-node.
-		//Retrieve all its objects.
 		for( i=0; i<node_v->num; i++)
 		{
 			if( is_relevant_obj( ( obj_t*)( node_v->child[ i]), q))
@@ -786,8 +739,6 @@ void retrieve_sub_tree( node_t* node_v, obj_set_t* &obj_set_v, query_t* q)
 	}
 	else
 	{
-		//node_v is an inner-node.
-		//Invoke the function recursively.
 		p_list = is_relevant_node( node_v, q);
 		for( i=0; i<node_v->num; i++)
 		{
@@ -1061,5 +1012,3 @@ void restore_IF_bst_node_list( bst_t* IF_v, bst_node_list_t* bst_node_list_v)
 		bst_node_list_iter = bst_node_list_iter->next;
 	}
 }
-
-
