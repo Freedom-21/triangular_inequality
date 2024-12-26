@@ -890,20 +890,20 @@ bst_t* const_IF( obj_set_t* obj_set_v, psi_t* psi_v)
  *	Construct a obj_set_t structure containing 3 objects
  *	from a tri_t structure @triplet_v.
  */
-obj_set_t* const_obj_set( tri_t* triplet_v)
-{
-	obj_set_t* obj_set_v;
+// obj_set_t* const_obj_set( tri_t* triplet_v)
+// {
+// 	obj_set_t* obj_set_v;
 
-	obj_set_v = alloc_obj_set( );
-	obj_set_v->obj_n = 3;
+// 	obj_set_v = alloc_obj_set( );
+// 	obj_set_v->obj_n = 3;
 
-	//Including the objects.
-	add_obj_set_entry( triplet_v->o, obj_set_v);
-	add_obj_set_entry( triplet_v->o_1, obj_set_v);
-	add_obj_set_entry( triplet_v->o_2, obj_set_v);
+// 	//Including the objects.
+// 	add_obj_set_entry( triplet_v->o, obj_set_v);
+// 	add_obj_set_entry( triplet_v->o_1, obj_set_v);
+// 	add_obj_set_entry( triplet_v->o_2, obj_set_v);
 
-	return obj_set_v;
-}
+// 	return obj_set_v;
+// }
 
 /*
  *	Check the distance constraint.

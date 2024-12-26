@@ -39,33 +39,6 @@ void GetTime(struct rusage* timeStart, struct rusage* timeEnd, float* userTime, 
 #endif
 
 /*
- *	IRTree_read_config reads the configuration info fro constructing the IRTree.
- */
-IRTree_config_t* read_config_irtree()
-{
-    //char des[MAX_DESCRIPTION_LENG];
-    FILE* c_fp;
-
-    IRTree_config_t* cfg = (IRTree_config_t*)malloc(sizeof(IRTree_config_t));
-
-    if ((c_fp = fopen(CONFIG_FILE, "r")) == NULL) {
-        fprintf(stderr, "The config file cannot be opened.\n");
-        exit(0);
-    }
-
-    //reads the configuration info.
-    fscanf(c_fp, "%s%s%s", cfg->loc_file, cfg->doc_file, cfg->tree_file);
-    fscanf(c_fp, "%i%i%i", &cfg->obj_n, &cfg->key_n, &cfg->dim); //data related.
-    //fscanf( c_fp, "%i%i%i", &(cfg->M), &(cfg->m), &( cfg->split_opt));//R-tree related.
-    fscanf(c_fp, "%i", &(cfg->split_opt)); //R-tree related.
-    //fscanf( c_fp, "%i", &cfg->key_n);									//IF related.
-
-    fclose(c_fp);
-
-    return cfg;
-}
-
-/*
  *	Read the configuration for the Co-location mining problem.
  *  return an colocation_config_t pointer pointing to an object that storing the config
  */
@@ -90,7 +63,8 @@ colocation_config_t* read_config_colocation()
 
     fscanf(c_fp, "%i%s", &cfg->key_n, cfg->doc_file);
 
-    fscanf(c_fp, "%i%s", &cfg->tree_tag, cfg->tree_file);
+    fscanf(c_fp, "%s", cfg->tree_file);
+    // fscanf(c_fp, "%i%s", &cfg->tree_tag, cfg->tree_file);
 
     fscanf(c_fp, "%i", &cfg->query_n);
 
@@ -120,22 +94,10 @@ void add_keyword_entry(k_node_t*& k_node_v, KEY_TYPE key)
         stat_v.memory_max = stat_v.memory_v;
     /*s*/
 }
-/****
- *	Print the location @k_head in @o_fp.
- ****/
-void print_loc(loc_t* loc_v, FILE* o_fp)
-{
-    int i;
-    for (i = 0; i < loc_v->dim; i++) {
-        fprintf(o_fp, "%0.4lf  ", loc_v->coord[i]);
-    }
-    fprintf(o_fp, "\n");
-}
 
 /*
  *	Print the statistics maintained in stat_v.
  */
-
 void print_colocation_stat(colocation_config_t* cfg, int cnt)
 {
     FILE* s_fp;
@@ -169,76 +131,6 @@ void alloc_obj(obj_t* obj_v, int dim)
     memset(obj_v->MBR, 0, dim * sizeof(range));
 }
 
-/*
- *	Read the data based on the IRTree_config_t info.
- */
-data_t* read_data_irtree(IRTree_config_t* cfg)
-{
-    int i, j;
-    KEY_TYPE key;
-    char des;
-    char keys[TEXT_COL_MAX];
-    char* tok;
-
-    k_node_t* k_node_v;
-    FILE* i_fp;
-
-    data_t* data_v = (data_t*)malloc(sizeof(data_t));
-    memset(data_v, 0, sizeof(data_t));
-
-    data_v->dim = cfg->dim;
-    data_v->obj_n = cfg->obj_n;
-    data_v->key_n = cfg->key_n;
-
-    data_v->obj_v = (obj_t*)malloc(sizeof(obj_t) * data_v->obj_n);
-    memset(data_v->obj_v, 0, sizeof(obj_t) * data_v->obj_n);
-
-    //data_v->key_freq_v = bst_ini( );
-
-    //Read the loc info.
-    if ((i_fp = fopen(cfg->loc_file, "r")) == NULL) {
-        fprintf(stderr, "Cannot open the loc file.\n");
-        exit(0);
-    }
-
-    for (i = 0; i < data_v->obj_n; i++) {
-        alloc_obj(data_v->obj_v + i, data_v->dim);
-
-        fscanf(i_fp, "%i", &(data_v->obj_v[i].id));
-
-        for (j = 0; j < data_v->dim; j++) {
-            fscanf(i_fp, "%c%f", &des, &(data_v->obj_v[i].MBR[j].min));
-            data_v->obj_v[i].MBR[j].max = data_v->obj_v[i].MBR[j].min;
-        }
-    }
-
-    fclose(i_fp);
-
-    //Read the keywords info.
-    if ((i_fp = fopen(cfg->doc_file, "r")) == NULL) {
-        fprintf(stderr, "Cannot open the doc file.\n");
-        exit(0);
-    }
-
-    for (i = 0; i < data_v->obj_n; i++) {
-        fgets(keys, TEXT_COL_MAX, i_fp);
-
-        tok = strtok(keys, " ,");
-        while ((tok = strtok(NULL, " ,"))) {
-            key = atoi(tok);
-
-            data_v->obj_v[i].fea = key;
-        }
-    }
-
-    fclose(i_fp);
-
-    return data_v;
-}
-
-/*
- *
- */
 data_t* alloc_data(int num)
 {
     data_t* data_v;
@@ -269,7 +161,6 @@ data_t* read_data_colocation(colocation_config_t* cfg)
     FILE* i_fp;
 
     data_v = alloc_data(cfg->obj_n);
-    // performed inside alloc_data function: data_v->obj_n = cfg->obj_n;
 
     data_v->dim = cfg->dim;
     data_v->key_n = cfg->key_n;
@@ -293,7 +184,7 @@ data_t* read_data_colocation(colocation_config_t* cfg)
 
     //Read the IDs info.
     if ((i_fp = fopen(cfg->doc_file, "r")) == NULL) {
-        fprintf(stderr, "Cannot open the doc file.\n");
+        fprintf(stderr, "Cannot open the IDs file.\n");
         exit(0);
     }
 

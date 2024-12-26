@@ -28,9 +28,8 @@ typedef struct bst_node
 	//IF specific:
 	KEY_TYPE			key;
 
-	BIT_TYPE			p_list;		//in the IR-tree.
+	BIT_TYPE			p_list;		//in the R-tree.
 	obj_set_t*			p_list_obj;	//a normal one.
-	// void*				cns_v;
 
 	//data_utility specific:
 	KEY_TYPE			key_id;

@@ -51,7 +51,7 @@ void range_query_sub( node_t* node_v, disk_t* disk_v, obj_set_t* &obj_set_v, que
 
 obj_set_t* range_query( disk_t* disk_v, query_t* q);
 bst_t* const_IF( obj_set_t* obj_set_v, psi_t* psi_v);
-obj_set_t* const_obj_set( tri_t* triplet_v);
+// obj_set_t* const_obj_set( tri_t* triplet_v);clea
 bool check_dist_constraint( obj_set_t* obj_set_v, obj_t* obj_v, obj_t* o, B_KEY_TYPE d);
 bst_node_list_t* update_IF_obj( bst_t* IF_v, obj_t* obj_v);
 void release_bst_node_list( bst_node_list_t* bst_node_list_v);

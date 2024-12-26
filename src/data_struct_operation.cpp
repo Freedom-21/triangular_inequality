@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "data_struct_operation.h"
 
-#define	BIT_LENGTH	32
-
 /*
  *	Allocate a fsi_t structure.
  */
@@ -108,15 +106,11 @@ fsi_t* add_fsi(fsi_t* fsi_v, FEA_TYPE fea)
 
     memcpy(rtn->feaset, fsi_v->feaset, fsi_v->fea_n * sizeof(FEA_TYPE));
 
-    //--maintain ordering
-    // note that rtn->feaset[rtn->fea_n-1] is the LAST element
     if (rtn->feaset[rtn->fea_n - 2] > fea) {
         rtn->feaset[rtn->fea_n - 1] = rtn->feaset[rtn->fea_n - 2];
         rtn->feaset[rtn->fea_n - 2] = fea;
     } else
         rtn->feaset[rtn->fea_n - 1] = fea;
-
-    //--
 
     rtn->obj_set_list_v = new std::vector<obj_set_t*>();
     return rtn;
@@ -200,9 +194,6 @@ void release_IF(bst_t* T)
         /*s*/
     }
 }
-
-//-------------------------------------------------------------
-
 /*
  *	Print the @fsi in @o_fp.
  */
@@ -254,38 +245,24 @@ psi_t* fsi_to_psi(fsi_t* fsi_v, FEA_TYPE feaToExclude)
     return psi_v;
 }
 
-//-------------------------------------------------------------
-
-/*
- *	Retrieve all the objects located at the sub-tree rooted at @node_v.
- *	The retrieved objects are stored in obj_set_v.
- */
+// Retrieve all the objects located at the sub-tree rooted at @node_v.
+ 
 void retrieve_sub_tree(node_t* node_v, obj_set_t*& obj_set_v)
 {
     int i;
     BIT_TYPE p_list;
 
     if (node_v->level == 0) {
-        // node_v is a leaf-node.
-        // Retrieve all its objects.
         for (i = 0; i < node_v->num; i++) {
             add_obj_set_entry((obj_t*)(node_v->child[i]), obj_set_v);
         }
     } else {
-        // node_v is an inner-node.
-        // Invoke the function recursively.
         for (i = 0; i < node_v->num; i++) {
             retrieve_sub_tree((node_t*)(node_v->child[i]), obj_set_v);
         }
     }
 }
 
-/*
- *	Range query on the sub-tree rooted at @node_v.
- *	@disk_v indicates the range which is a circle.
- *
- *	The results are stored in @obj_set_v.
- */
 void range_query_sub(node_t* node_v, disk_t* disk_v, obj_set_t*& obj_set_v)
 {
     int i;
@@ -338,11 +315,6 @@ void range_query_sub(node_t* node_v, disk_t* disk_v, obj_set_t*& obj_set_v)
     }
 }
 
-/*
- *	Circle range query.
- *
- *	DFS: recursive implementation.
- */
 obj_set_t* range_query(disk_t* disk_v)
 {
     obj_set_t* obj_set_v;

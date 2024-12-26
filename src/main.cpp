@@ -61,11 +61,11 @@ void colocation()
     GetCurTime(&IR_tree_sta);
 #endif
 
-    if (cfg->tree_tag == 0) {
-        printf("Building IR-tree ...\n");
-        build_IRTree(data_v);
-        print_and_check_tree(1, cfg->tree_file);
-    }
+//    if (cfg->tree_tag == 0) { 
+    printf("Building IR-tree ...\n");
+    build_IRTree(data_v);
+    print_and_check_tree(1, cfg->tree_file);
+    // }
 
 #ifndef WIN32
     GetCurTime(&IR_tree_end);

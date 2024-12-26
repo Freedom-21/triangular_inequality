@@ -1204,39 +1204,7 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 	return true;
 }
 
-
-// obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
-// {
-// 	int tag;
-// 	bst_node_t* x;
-// 	obj_t* obj_v;
-// 	k_node_t* k_node_v;
-
-// 	obj_v = ( obj_t*)malloc( sizeof( obj_t));
-// 	memset( obj_v, 0, sizeof( obj_t));
-	
-// 	//id & MBr attributes.
-// 	obj_v->id = id_cnt++;
-// 	obj_v->MBR = node_v->MBRs[ loc];
-
-// 	tag = 0;
-// 	x = node_v->bst_v->root;
-	
-// 	while( get_next_in_order( x, tag))
-// 	{
-// 		//For a specific IF entry (a specific keyword x->key).		
-// 		if( get_k_bit( x->p_list, loc))
-// 			add_keyword_entry( k_node_v, x->key);
-		
-// 		if( !in_order_sub( x, tag))
-// 			break;
-// 	}
-
-// 	return obj_v;
-// }
-
 /*---------------------Added APIs-2011-03-09------------------------*/
-
 
 /*
 *	build_IRTree constructs the IR-tree based on the data file.

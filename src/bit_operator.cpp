@@ -1,6 +1,3 @@
-/*
- *	1. The range of k is [0, 31].
- */
 #include "bit_operator.h"
 
 #define	BIT_LENGTH	32
