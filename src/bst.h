@@ -34,9 +34,7 @@ typedef struct bst_node
 
 	//data_utility specific:
 	KEY_TYPE			key_id;
-	
-    ///SKECa+
-    // int freq;
+
     
 }	bst_node_t;
 
@@ -78,37 +76,13 @@ void bst_delete( bst_t* T, bst_node_t* x);
 
 void bst_update( bst_t* T, bst_node_t* x);
 
-void in_order_walk( bst_node_t* x);
-
 bst_node_t* bst_successor( bst_node_t* x);
 
-bst_node_t* bst_predecessor( bst_node_t* x);
-
-void print_bst( bst_t* T);
-
-void test_bst( );
-
-//Updated from 27 August, 2012 and on.
 bool in_order_sub( bst_node_t* &x, int &tag);
-
-void in_order_walk_non_recur( bst_node_t* x);
 
 bool get_next_in_order( bst_node_t* &x, int &tag);
 
 bst_node_t* bst_search( bst_t* bst_v, KEY_TYPE key);
-
-void bst_trim( bst_t* bst_v, KEY_TYPE u_bound);
-
-//Augmentating the bst to be a b_heap.
-//bst_noded_t* bst_b_h_get_top( bst_t* bst_v);
-
-int bst_search_range( bst_t* bst_v, KEY_TYPE low, KEY_TYPE high, bst_node_t* &low_n, bst_node_t* &high_n);
-
-int bst_search_percentile_range( bst_t* bst_v, int low, int high, bst_node_t* &low_n, bst_node_t* &high_n);
-
-
-//For data_utility.h only.
-bst_node_t* bst_locate( bst_t* bst_v, KEY_TYPE key_id);
 
 
 #endif

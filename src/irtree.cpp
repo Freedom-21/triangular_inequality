@@ -1,12 +1,7 @@
 #include "irtree.h"
 
-/*
-* CreateNode malloc the storage space for a pointer to 'node'.
-*
-*  pnode indicates the pointer.
-*
-* return void.
-*/
+// CreateNode malloc the storage space for a pointer to 'node'.
+
 void CreateNode( node_t* &pnode)
 {
 	pnode = ( node_t*)malloc( sizeof( node));
@@ -341,15 +336,6 @@ bool UpdateMRB( node_t* pnode, range* &MBR)
 
 /*------------------------Insertion related APIs-------------------------*/
 
-/*
-*This function is used to choose a leaf node to include the obj_t to be inserted.
-*
-*  root indicates the rtree.
-*  MBR indicates the object for which to choose a leaf-node.
-*  leaf_node is used to get back to objective leaf node.
-*
-* return void.
-*/
 void ChooseLeaf( node_t* root, range* MBR, node_t* &leaf_node)
 {
 	int loc = 0;
@@ -361,22 +347,13 @@ void ChooseLeaf( node_t* root, range* MBR, node_t* &leaf_node)
 			leaf_node = root;
 			return;
 		}		
-
 		NeedLeastArea( root, MBR, loc);
 		root = ( node_t*)( root->child[loc]);
 	}
 }
 
+// This function is used to pick up two seed MBRangles.
 
-/*
-*This function is used to pick up two seed MBRangles.
-*
-*  pnode indicates the node to be split.
-*  MBR is the object to be inserted.
-*  g1, g2 get back the locations of the seeds( g1 = -1 for the MBR)
-* 
-* return void.
-*/
 void PickSeeds( node_t* pnode, range* MBR, int& g1, int& g2)
 {
 	int i, j, k;
@@ -424,22 +401,9 @@ void PickSeeds( node_t* pnode, range* MBR, int& g1, int& g2)
 	free( MBR_tmp);
 }
 
-/*
-* PickNext is used to pick the new item to be grouped.
-* 
-*  pnode is the node to split.
-*  node_1, node_2 indicate the two split nodes.
-*  node_c stores the node to which the 'next' entry is assigned.
-*  MBR indicates the MBR of the object/sub-tree to be inserted (valid when rTag == 0).
-*  done indicates the entries that have been assigned.
-*
-* return the loc of the next entry.
-*/
+// PickNext is used to pick the new item to be grouped.
 int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, range* MBR, bool* done, int rTag)
 {	
-	//Code is long, but the effiency is high.
-	//It could be shorten, but it's better not.
-	//Tie handling: Norbert's "R*-tree".
 	int i, next;
 	double max = -DBL_MAX, d1, d2, dif;
 	range* MBR_tmp;
@@ -457,7 +421,6 @@ int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, ra
 
 	for( ; i<pnode->num; )
 	{	
-		//Travel all the entries in pnode that haven't been grouped.
 		if( !( i>= 0 && done[ i] == true))
 		{				
 			d1 = GetIncArea( node_1, MBR_tmp);
@@ -468,7 +431,6 @@ int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, ra
 			{
 				max = fabs( dif);
 				next = i;
-
 				//Decide the node.
 				if(dif > 0)
 					node_c = node_1;
@@ -492,21 +454,14 @@ int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, ra
 					node_c = node_2;
 			}
 		}
-
 		i++;
 		MBR_tmp = pnode->MBRs[ i];
 	}
-
 	return next;
 }
 
-/*
- *	Assigne an entry to a node.
- *
- *	pnode involves the 'level' info.
- *	node_c indicates the node to which the entry is assigned.
- *	(obj, MBR) indicates the entry.
- */
+// 	Assigne an entry to a node.
+
 void AssignEntry( node_t* pnode, node_t* node_c, void* obj, range* MBR)
 {
 	node_c->child[ node_c->num] = obj;
@@ -517,29 +472,15 @@ void AssignEntry( node_t* pnode, node_t* node_c, void* obj, range* MBR)
 		( ( node_t*)obj)->parent = node_c;
 		( ( node_t*)obj)->loc = node_c->num;
 	}
-
 	node_c->num ++;
 }
 
-/*
-* SplitNode is used to split the node into two nodes.
-*
-*  pnode is the node to be split--Note the storage space before invoke.
-*  node_2 is the new node allocated outside the function to store the new node.
-*  obj indicates the object/sub-tree to be inserted.
-*  opt = 1 for LinearSplit and opt = 2 for QuadraticSplit.
-*
-* return void.
-*/
+// Split node into two when needed
 void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 {   
-	//Note that pnode pointer has been updated in this function.
-	//It is required to update the child attribute of pnode's parent if it exists.
-
 	int i, g1, g2, rTag = 0, qCase, next = 0;
 	node_t* node_c, *node_1;
 
-	//
 	CreateNode( node_1);
 	CreateNode( node_2);
 	
@@ -563,9 +504,6 @@ void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 		MBR =( ( obj_t*)obj)->MBR;
 	}
 
-	// if( opt == 1)
-	// 	LinearPickSeeds( pnode, MBR, g1, g2);
-	// else
 	PickSeeds( pnode, MBR, g1, g2);
 	
 	//Assign the two entries indicated by g1, g2.
@@ -607,10 +545,6 @@ void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 			break;
 		}
 
-		//PickNext.
-		// if( opt == 1)
-		// 	next = LinearPickNext( pnode, node_1, node_2, node_c, done, rTag);
-		// else
 		next = PickNext( pnode, node_1, node_2, node_c, MBR, done, rTag);
 
 		//Assign the 'next' entry.
@@ -668,7 +602,6 @@ E:	node_1->parent = pnode->parent;
 
 /*
  *	Create a new root due to the split operation.
- *	
  *	node_1 is the original root.
  *	node_2 is the new split node from node_1.
  */
@@ -716,13 +649,7 @@ node_t* CreateNewRoot( node_t* node_1, node_t* node_2)
 }
 
 /*
-* InsertSub is used to insert an node/subtree recursively.
-*
-*  pnode indicates the node to insert in.
-*  obj indicates the node(sbutree) to be inserted in.
-*
-* return NULL if the root hasn't changed;
-* otherwise, return the new root.
+* InsertSub is used to insert a node/subtree recursively.
 */
 node_t* InsertSub( node_t* pnode, void* obj)
 {
@@ -788,22 +715,15 @@ node_t* InsertSub( node_t* pnode, void* obj)
 			return CreateNewRoot( pnode, node_2);
 		}
 
-		//pnode->parent != NULL
 		node_t* pP;
 		pP = pnode->parent;
-		pP->child[ pnode->loc] = pnode;	//pP->child[ pL->loc] might be invalid due to
-										//the "split" operation on pL.
+		pP->child[ pnode->loc] = pnode;	
 
-		//UpdateMRB( pnode, pP->MBRs[ pnode->loc]);
 		AdjustTree( pnode);
 
 		adjust_parent_IF( pP, pnode->loc);
 
-/*t/
-		print_and_check_tree( 2);
-/*t*/
-		
-		return InsertSub( pP, node_2);
+	return InsertSub( pP, node_2);
 	}
 }
 
@@ -833,11 +753,6 @@ void AdjustTree( node_t* pnode)
 
 /*
 * Insert is used to insert object into the rtree(root).
-*
-*  root indicates the rtree to insert in.
-*  obj denotes the object to be inserted.
-*
-* return void.
 **/
 void Insert( obj_t* obj)
 {
@@ -861,11 +776,6 @@ void Insert( obj_t* obj)
 
 /*
 *This function is used to 'Search' the object.
-*
-*  root indicates the rtree.
-*  MBR inidcates the MBR of the object to be searched.
-*  loc is used to get back the location of destination in leaf-node.
-* 
 * return the leaf-node that includes the object, else NULL.
 **/
 node_t* Search( node_t* root, range* MBR, int& loc)
@@ -885,16 +795,13 @@ node_t* Search( node_t* root, range* MBR, int& loc)
 					return node_c;
 			}
 		}
-
-		//return NULL;
-		//All children have been traveled.
 	}
 	else
 	{
 		//if the current node is leaf-node.
 		for(i=0; i<root->num; i++)
 		{
-			if( IsSame( root->MBRs[i], MBR))	//bug--IsOverlapped(root->MBRs[i], MBR)==1
+			if( IsSame( root->MBRs[i], MBR))	
 			{
 				loc = i;
 				return root;
@@ -905,15 +812,8 @@ node_t* Search( node_t* root, range* MBR, int& loc)
 	return NULL;
 }
 
-/*
-* ChooseInner is used to choose the inner node for Re-Insertion w.r.t. pnode.
-*
-*  root is the root of rtree.
-*  pnode is the sub to inserted.
-*  gets back the inner node's pointer.
-*
-* return void.
-**/
+// ChooseInner is used to choose the inner node for Re-Insertion w.r.t. pnode.
+
 void ChooseInner( node_t* root, node_t* pnode, node_t* &inner_node)
 {
 	int loc;
@@ -941,11 +841,6 @@ void ChooseInner( node_t* root, node_t* pnode, node_t* &inner_node)
 
 /*
 * CondenseSub is used as a sub function in CondenseTree to generate the two chains.
-* 
-*  pnode indicates the node where deletion occurs.
-*  h1 is used to get back the objPointer chain (the last vacant node).
-*  h2 is used to get back the nodePointer chain (the last vacant node).
-* 
 * return void.
 **/
 void CondenseSub( node_t* pnode, objPointer* h1, nodePointer* h2 )
@@ -1057,8 +952,6 @@ void CondenseTree( node_t* pnode)
 	eTag1 = h1->next;
 	while( h1 != NULL)
 	{
-//		if( R_TREE_OR_R_STAR_TREE)	//R-tree
-//		{
 			node_t* lnode, *res;
 			ChooseLeaf( IRTree_v.root, h1->p->MBR, lnode);
 			res = InsertSub( lnode, h1->p);
@@ -1067,9 +960,6 @@ void CondenseTree( node_t* pnode)
 				IRTree_v.root = res;
 				IRTree_v.height ++;
 			}
-//		}
-//		else						//R*-tree.
-//			RStarInsert( h1->p, 0);		
 
 		free(h1);
 
@@ -1110,13 +1000,8 @@ void CondenseTree( node_t* pnode)
 	free(h2);
 }
 
-/*
-* Delete is used to delete an entry from the rtree.
-* 
-*  obj donates the object to be deleted.
-*
-* return 1 if successful; otherwise return 0.
-*/
+//  Delete is used to delete an entry from the rtree.
+
 int Delete( obj_t* obj)
 {
 	int loc;
@@ -1128,11 +1013,9 @@ int Delete( obj_t* obj)
 
 	if( lnode == NULL)
 	{	
-		//The target object does not exist.
 		return 0;
 	}
 
-	//Delete the object from the node.
 	oTmp = ( obj_t*)( lnode->child[loc]);
 
 	lnode->child[ loc] = lnode->child[ lnode->num-1];
@@ -1143,8 +1026,6 @@ int Delete( obj_t* obj)
 	free( oTmp->MBR);
 	free( oTmp);
 
-	//
-	
 	//CondenseTree.
 	CondenseTree( lnode);
 	
@@ -1173,11 +1054,8 @@ int Delete( obj_t* obj)
 
 /*---------------------------Other Operation APIs---------------------------------*/
 
-/*
-* ini_tree is used to initialize a rtree (from the datafile, if there exists).
-*
-* return true if success, else false.
-*/
+//  ini_tree is used to initialize a rtree
+
 void ini_tree( )
 {
 	memset( &IRTree_v, 0, sizeof( IRTree_t));
@@ -1327,35 +1205,35 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 }
 
 
-obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
-{
-	int tag;
-	bst_node_t* x;
-	obj_t* obj_v;
-	k_node_t* k_node_v;
+// obj_t* const_obj( node_t* node_v, int loc, int& id_cnt)
+// {
+// 	int tag;
+// 	bst_node_t* x;
+// 	obj_t* obj_v;
+// 	k_node_t* k_node_v;
 
-	obj_v = ( obj_t*)malloc( sizeof( obj_t));
-	memset( obj_v, 0, sizeof( obj_t));
+// 	obj_v = ( obj_t*)malloc( sizeof( obj_t));
+// 	memset( obj_v, 0, sizeof( obj_t));
 	
-	//id & MBr attributes.
-	obj_v->id = id_cnt++;
-	obj_v->MBR = node_v->MBRs[ loc];
+// 	//id & MBr attributes.
+// 	obj_v->id = id_cnt++;
+// 	obj_v->MBR = node_v->MBRs[ loc];
 
-	tag = 0;
-	x = node_v->bst_v->root;
+// 	tag = 0;
+// 	x = node_v->bst_v->root;
 	
-	while( get_next_in_order( x, tag))
-	{
-		//For a specific IF entry (a specific keyword x->key).		
-		if( get_k_bit( x->p_list, loc))
-			add_keyword_entry( k_node_v, x->key);
+// 	while( get_next_in_order( x, tag))
+// 	{
+// 		//For a specific IF entry (a specific keyword x->key).		
+// 		if( get_k_bit( x->p_list, loc))
+// 			add_keyword_entry( k_node_v, x->key);
 		
-		if( !in_order_sub( x, tag))
-			break;
-	}
+// 		if( !in_order_sub( x, tag))
+// 			break;
+// 	}
 
-	return obj_v;
-}
+// 	return obj_v;
+// }
 
 /*---------------------Added APIs-2011-03-09------------------------*/
 
@@ -1663,16 +1541,6 @@ void delete_IF_loc( bst_t* bst_v, int loc)
 	}
 }
 
-/*
- *	Adjust the IF corresponding to the parent of the split nodes.
- *	//Method 1: Re-construct the IF of the parent 
- *				by using the keyword lists of its entries.
- *	//Method 2: Update the posting lists related to the split node only.
- *				We adopt Method 2 for adjust_parent_IF.
- *
- *	p_node is the parent node.
- *	loc is the order of the entry corresponding to the split node.
- */
 void adjust_parent_IF( node_t* p_node, int loc)
 {
 	//Remove the entry corresponding to loc in p_node's IF.

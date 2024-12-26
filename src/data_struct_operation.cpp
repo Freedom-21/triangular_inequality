@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "data_struct_operation.h"
 
+#define	BIT_LENGTH	32
+
 /*
  *	Allocate a fsi_t structure.
  */
@@ -222,7 +224,7 @@ void print_fsi_set(fsi_set_t** result, int numOfFea, FILE* o_fp)
             fsi_t* fsi_v = result[i]->head->next;
 
             if (fsi_v != NULL)
-                fprintf(o_fp, "%d\n", result[i]->fsi_n);
+                fprintf(o_fp, "Number of Colocation patterns on this size : %d\n", result[i]->fsi_n);
 
             while (fsi_v != NULL) {
                 print_fsi(fsi_v, o_fp);
@@ -350,6 +352,3 @@ obj_set_t* range_query(disk_t* disk_v)
 
     return obj_set_v;
 }
-
-
-

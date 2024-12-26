@@ -6,6 +6,7 @@
 #include "data_utility.h"
 #include "joinless_utility.h"
 #include "irtree.h"
+#include <math.h>
 
 
 /* ------------------------- create/add/release  ------------------------- */
