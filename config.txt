@@ -1,1 +1,1 @@
-1	43935	datasets/storm2023_loc.csv	16	datasets/storm2023_id.csv	storm_tree.txt	1	0.8	2
+1	46748	datasets/syn_loc.txt	312	datasets/syn_doc.txt	real_tree.txt	1	0.5	5

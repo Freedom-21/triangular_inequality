@@ -1,8 +1,3 @@
-/*
- *	Author: Harry
- *	Email: khchanak@cse.ust.hk
- */
-
 #ifndef yoo_alg_h
 #define yoo_alg_h
 

@@ -40,7 +40,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 #endif
 
     // P_1
-    printf("Constructing P_1...\n");
+    // printf("Constructing P_1...\n");
     result[0] = const_L1_apriori();
 
 #ifndef WIN32
@@ -127,7 +127,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
     result[i] = fsi_set_cur;
 }
 
-printf("Apriori algorithm completed.\n");
+printf("Improved algorithm completed.\n");
 return result;
 }
 
