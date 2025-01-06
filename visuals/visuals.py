@@ -12,11 +12,15 @@ import numpy as np
 import matplotlib.cm as cm  
 
 # For hover labels
-# Make sure you have installed mplcursors: `pip install mplcursors`
 import mplcursors
 
-loc_file = 'blm_loc.csv'
-id_file = 'blm_id.csv'
+loc_file = '../datasetGen/synthetic_loc1.csv'
+id_file = '../datasetGen/synthetic_id1.csv'
+# loc_file = "syn_loc.csv"
+# id_file = "syn_doc.csv"
+
+# loc_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/syn_loc8.txt'
+# id_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/syn_doc8.txt'
 
 loc_data = pd.read_csv(loc_file, header=None, names=['objectId', 'X', 'Y'])
 id_data = pd.read_csv(id_file, header=None, names=['objectId', 'featureId'])

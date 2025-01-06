@@ -5,15 +5,18 @@ import seaborn as sns
 
 # Suppose we fix dist=10 for dataset D1, but vary PI
 results_varied = [
-    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.50, 'dist': 10, 'Time': 460.86, 'Memory': 1495.53},
-    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.50, 'dist': 10, 'Time': 302.16, 'Memory': 528.59},
+    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.20, 'dist': 10,  'Time': 311.18, 'Memory': 2019.35},
+    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.20, 'dist': 10,  'Time': 184.47, 'Memory': 748.32},
+
+    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.50, 'dist': 10,  'Time': 310.76, 'Memory': 2019.17},
+    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.50, 'dist': 10,  'Time': 187.95, 'Memory': 748.32},
     
-    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.60, 'dist': 10, 'Time': 370.12, 'Memory': 1200.00},
-    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.60, 'dist': 10, 'Time': 250.40, 'Memory': 500.00},
+    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.70, 'dist': 10, 'Time': 284.05, 'Memory': 1993.82},
+    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.70, 'dist': 10, 'Time': 160.99, 'Memory': 748.32},
     
-    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.70, 'dist': 10, 'Time': 362.91, 'Memory': 601.94},
-    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.70, 'dist': 10, 'Time': 182.55, 'Memory': 188.33},
-    # Add more as you like...
+    {'Dataset': 'D1', 'Algorithm': 'Joinless', 'PI': 0.90, 'dist': 10, 'Time': 103.4, 'Memory': 1856.75},
+    {'Dataset': 'D1', 'Algorithm': 'Improved', 'PI': 0.90, 'dist': 10, 'Time': 8.55, 'Memory': 748.35},
+
 ]
 
 df_varied = pd.DataFrame(results_varied)
@@ -24,7 +27,7 @@ df_d1_dist10 = df_varied[(df_varied['Dataset'] == 'D1') & (df_varied['dist'] == 
 # TIME vs. PI
 plt.figure(figsize=(6, 4))
 sns.lineplot(data=df_d1_dist10, x='PI', y='Time', hue='Algorithm', marker='o')
-plt.title('Time vs. PI for D1 (dist=10)')
+plt.title('Time vs. PI for synthetic_5 Dataset with (Obj: 112k, Feature: 565) (dist=10)')
 plt.ylabel('Time (seconds)')
 plt.xlabel('Participation Index (PI)')
 plt.grid(True)
@@ -34,7 +37,7 @@ plt.show()
 # MEMORY vs. PI
 plt.figure(figsize=(6, 4))
 sns.lineplot(data=df_d1_dist10, x='PI', y='Memory', hue='Algorithm', marker='o')
-plt.title('Memory vs. PI for D1 (dist=10)')
+plt.title('Memory vs. PI for synthetic_5 Dataset with (Obj: 112k, Feature: 565) (dist=10)')
 plt.ylabel('Memory (MB)')
 plt.xlabel('Participation Index (PI)')
 plt.grid(True)
