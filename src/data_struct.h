@@ -40,7 +40,7 @@ typedef struct fsi
 {
     int			fea_n;
     FEA_TYPE*	feaset; //array
-    B_KEY_TYPE  sup;
+    B_KEY_TYPE  PI;
     struct fsi* next;   //use when fsi_t in fsi_set_t
     std::vector<struct obj_set *>* obj_set_list_v; //For joinless    
 }	fsi_t;

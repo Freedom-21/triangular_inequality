@@ -203,7 +203,7 @@ void print_fsi(fsi_t* fsi_v, FILE* o_fp)
         fprintf(o_fp, "%d  ", fsi_v->feaset[i]);
     }
 
-    fprintf(o_fp, "%lf  ", fsi_v->sup);
+    fprintf(o_fp, "%lf  ", fsi_v->PI);
 
     fprintf(o_fp, "\n");
 }

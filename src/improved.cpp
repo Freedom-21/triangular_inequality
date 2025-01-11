@@ -3,7 +3,7 @@
 #include <cassert>
 #include <limits>
 
-fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
+fsi_set_t** improved(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 {
     printf("Starting Improved Algorithm with, objects=%d, Features=%d, dist_thr=%.5f\n", numOfObj, numOfFea, dist_thr);
     int i, j;
@@ -12,7 +12,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
     fsi_t *fsi_v1, *fsi_v2, *fsi_v3;
 
     FEA_TYPE fea_v1;
-    B_KEY_TYPE sup;
+    B_KEY_TYPE PI;
 
     i = 0;
     // Initialize the structure for storing P_1, P_2, ..., P_{|F|}
@@ -33,7 +33,7 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 
     // P_1
     // printf("Constructing P_1...\n");
-    result[0] = const_L1_apriori();
+    result[0] = size_one_patterns();
 
 #ifndef WIN32
     GetCurTime(&query_end);
@@ -83,13 +83,12 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
                     continue;
                 }
 
-                // Support calculation
-                sup = comp_support(alg_opt, fsi_v3, numOfObj);
+                PI = compute_pi(alg_opt, fsi_v3, numOfObj);
                 // printf("Computed support for candidate set:");
                 // for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
-                // printf(" is %.5lf\n", sup);
+                // printf(" is %.5lf\n", PI);
 
-                if (sup >= min_pi) {
+                if (PI >= min_pi) {
                     // printf("Adding candidate set to Level P_%d\n", i + 1);
                     add_fsi_set_entry(fsi_set_cur, fsi_v3);
                 } else {
@@ -123,18 +122,12 @@ printf("Improved algorithm completed.\n");
 return result;
 }
 
-
-/*
- *  Construct the L1 feature set.
- *
- *
- */
-fsi_set_t* const_L1_apriori()
+fsi_set_t* size_one_patterns()
 {
     fsi_set_t* fsi_set_v;
     fsi_t* fsi_v;
     bst_node_t* bst_node_v;
-    B_KEY_TYPE sup;
+    B_KEY_TYPE PI;
 
     fsi_set_v = alloc_fsi_set();
 
@@ -144,9 +137,9 @@ fsi_set_t* const_L1_apriori()
         fsi_v = alloc_fsi(1);
         fsi_v->feaset[0] = bst_node_v->key;
 
-        sup = 1; // by definition
+        PI = 1; // by definition
 
-        fsi_v->sup = sup;
+        fsi_v->PI = PI;
 
         add_fsi_set_entry(fsi_set_v, fsi_v);
 
@@ -156,18 +149,6 @@ fsi_set_t* const_L1_apriori()
     return fsi_set_v;
 }
 
-/*
- *	The checking for the join step.
- *
- *	Check whether two sets @fsi_v1 and @fsi_v2
- *	share s-1 features, where s is the number of features in @fsi_v1 or
- *@fsi_v2.
- *
- *	return  -1 if the join check fails,
- *	otherwise, return the (only) feature in fsi_v2 that is not contained in
- *fsi_v1.
- *
- */
 FEA_TYPE join_check(fsi_t* fsi_v1, fsi_t* fsi_v2)
 {
     FEA_TYPE fea_v;
@@ -221,37 +202,17 @@ bool all_subsets_exist(fsi_set_t* fsi_set_v, fsi_t* fsi_v)
     return true;
 }
 
-
-
-//---------------------------------------------------------
-
-
-// B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
-// {
-//     return comp_support(alg_opt, fsi_v, numOfObj);
-// }
-
-// /*
-//  * The implementaiton of "SupportComputation" in the paper.
-//  *  @fsi_v = current feature set C
-//  *
-//  *  Output: @sup = sup(C)
-//  */
-B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
+// calculate participation index by counting particpant objects / total
+B_KEY_TYPE compute_pi(int alg_opt, fsi_t* fsi_v, int numOfObj)
 {
-        B_KEY_TYPE sup, sup_C_f;
+        B_KEY_TYPE PI, sup_C_f;
     obj_node_t* obj_node_v;
     obj_set_t* obj_set_v;
 
-    sup = INFINITY;
+    PI = INFINITY;
     sup_C_f = 0;
-
-    //    FEA_TYPE fea_worst;
-    //    obj_set_t* obj_set_worst;
-
-    // keep track objects that are involved in row instances that have been found
-    // note that obj_id-1 is needed inside the array
-    bool* RI = new bool[numOfObj]();
+    // colocating discovered colocation instances to reuse 
+    bool* colocation_instances = new bool[numOfObj]();
 
     // for each feature f in C
     for (int i = 0; i < fsi_v->fea_n; i++) {
@@ -269,7 +230,7 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
                 struct rusage S3_sta, S3_end;
                 GetCurTime(&S3_sta);
 #endif
-                flag = RI[obj_node_v->obj_v->id - 1];
+                flag = colocation_instances[obj_node_v->obj_v->id - 1];
                 if (flag)
                     stat_v.S3_sum++;
 #ifndef WIN32
@@ -279,7 +240,7 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
 #endif
             }
 
-            if (flag || check_row_instance(alg_opt, fsi_v, obj_node_v->obj_v, RI)) {
+            if (flag || check_row_instance(alg_opt, fsi_v, obj_node_v->obj_v, colocation_instances)) {
                 // if (cost_tag == 1)
                 sup_C_f += 1; //each group is counted as 1
             }
@@ -291,18 +252,18 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
         sup_C_f = sup_C_f / (double)obj_set_v->obj_n;
 
         // maintain the smallest one here
-        if (sup_C_f <= sup) {
-            sup = sup_C_f;
+        if (sup_C_f <= PI) {
+            PI = sup_C_f;
 
-            // early stopping: sup of this fea set < threshold
-            if (sup < min_pi)
+            // early stopping: PI of this fea set < threshold
+            if (PI < min_pi)
                 break;
         }
     }
-    fsi_v->sup = sup;
-    delete[] RI;
+    fsi_v->PI = PI;
+    delete[] colocation_instances;
 
-    return sup;
+    return PI;
 }
 
 /*
@@ -313,7 +274,7 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
  *  @fsi_v: the current checking feature set C
  *  @obj_v: the current checking object
  */
-bool check_row_instance(int alg_opt, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
+bool check_row_instance(int alg_opt, fsi_t* fsi_v, obj_t* obj_v, bool* colocation_instances)
 {
 #ifndef WIN32
     float sys_t, S4_t = 0;
@@ -322,12 +283,12 @@ bool check_row_instance(int alg_opt, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
 #endif
 
     bool flag = true;
-    if (alg_opt == 1) // combinatorial
+    if (alg_opt == 1) // enumeration
     {
-        flag = combinatorial(fsi_v, obj_v, NULL, RI);
+        flag = enumeration(fsi_v, obj_v, NULL, colocation_instances);
     } else // filter-and-verification
     {
-        flag = filter_and_verify(alg_opt - 1, fsi_v, obj_v, RI);
+        flag = preliminary_checks(alg_opt - 1, fsi_v, obj_v, colocation_instances);
     }
 
 #ifndef WIN32
@@ -340,13 +301,13 @@ bool check_row_instance(int alg_opt, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
 }
 
 /*
- *  Method 1 : Combinatorial Approach
+ *  Method 1 : enumeration Approach
  *
  *  if we call this function from method 4, S2 = range_query(disk_v,q) to save
  * some time
  *  else S2 = NULL
  */
-bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
+bool enumeration(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* colocation_instances)
 {
     bst_t* inverted_list;
     obj_set_t *S_0, *S = NULL;
@@ -391,7 +352,7 @@ bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
     S_0 = alloc_obj_set();
 
     // Invoke the sub-procedure "recursively".
-    S = combinatorial_sub(inverted_list, S_0, obj_v, dist_thr);
+    S = enumeration_sub(inverted_list, S_0, obj_v, dist_thr);
 
     // Release the resources.
     release_obj_set(S_0);
@@ -400,7 +361,7 @@ bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
         //        add_obj_set_entry(obj_v, S);
         //        printf("S5:%f\t%f\n",comp_diameter(S), dist_thr);
         //---
-        // update RI
+        // update colocation_instances
         {
 #ifndef WIN32
             float sys_t, S3_t = 0;
@@ -410,7 +371,7 @@ bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
             obj_node_t* obj_node_v;
             obj_node_v = S->head->next;
             while (obj_node_v != NULL) {
-                RI[obj_node_v->obj_v->id - 1] = true;
+                colocation_instances[obj_node_v->obj_v->id - 1] = true;
                 obj_node_v = obj_node_v->next;
             }
 
@@ -430,13 +391,13 @@ bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
 }
 
 /*
- *	The sub-procedure of combinatorial approach.
+ *	The sub-procedure of enumeration approach.
  *
  * we process as follows: for each object o in the root,
  *  we update the IF s.t. the keywords in o are removed (note that the root must be removed), then o is added to S_0, then we recursive call the function to find another object in the (new) root and update IF and add to S_0...., until the IF is empty, then S covers all the keywords.
  * note that if we do not consider the distance constraint, we can always find a feaisble set (e.g., by adding all objects in IF into S). When we consider the distance constraint, we may return NULL.
  */
-obj_set_t* combinatorial_sub(bst_t* IF_v, obj_set_t* S_0, obj_t* o, B_KEY_TYPE d)
+obj_set_t* enumeration_sub(bst_t* IF_v, obj_set_t* S_0, obj_t* o, B_KEY_TYPE d)
 {
     obj_t* obj_v;
     obj_set_t* S;
@@ -467,7 +428,7 @@ obj_set_t* combinatorial_sub(bst_t* IF_v, obj_set_t* S_0, obj_t* o, B_KEY_TYPE d
         add_obj_set_entry(obj_v, S_0);
 
         // Sub-procedure.
-        S = combinatorial_sub(IF_v, S_0, o, d);
+        S = enumeration_sub(IF_v, S_0, o, d);
 
         // Restore the S_0.
         remove_obj_set_entry(S_0);
@@ -532,11 +493,11 @@ bool bst_check_plist(bst_t* bst_v, fsi_t* fsi_v, FEA_TYPE fea)
  *  Method 4 : Filtering-and-Verification Approach
  *
  *  @alg_opt2:
- *  1 = (method 1) combinatorial
+ *  1 = (method 1) enumeration
  *  2 = (method 2) Dia
  *  3 = (method 3) mCK
  */
-bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
+bool preliminary_checks(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* colocation_instances)
 {
     loc_t* loc_v;
     obj_set_t* obj_set_v = NULL; // range query Disk(o,d) or NULL
@@ -547,7 +508,7 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
     bool feasibleflag3 = false;
 
 //---------------------------------------------------
-// Filter 2. feasiblility check in D(o,d) by NeighborCountWithinD
+// Check 2. feasiblility check in D(o,d) by NeighborCountWithinD
 
 #ifndef WIN32
     float sys_t, S1_t = 0;
@@ -575,7 +536,7 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
         }
     }
     //---------------------------------------------------
-    // Filter 3. range query in D(o,d/2)
+    // Check 3. range query in D(o,d/2)
 
     loc_v = get_obj_loc(obj_v);
     q = alloc_query();
@@ -604,8 +565,6 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
         }
     }
 	
-    //---------------------------------------------------
-    // verification
 
     stat_v.S5_sum++;
 
@@ -619,7 +578,7 @@ bool filter_and_verify(int alg_opt2, fsi_t* fsi_v, obj_t* obj_v, bool* RI)
 
     // note that obj_set_v is released inside the functions
     if (alg_opt2 == 1)
-        feasibleflag3 = combinatorial(fsi_v, obj_v, obj_set_v, RI);
+        feasibleflag3 = enumeration(fsi_v, obj_v, obj_set_v, colocation_instances);
 
 #ifndef WIN32
     GetCurTime(&S5_end);
@@ -679,8 +638,6 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
     loc_t* loc_v;
     obj_set_t* obj_set_v;
     obj_node_t* obj_node_v;
-    //    std::unordered_map<FEA_TYPE,int>* map, * map2;
-    //    std::unordered_map<FEA_TYPE,float> * tmp;
     int *map, *map2;
     float* tmp;
 
@@ -700,8 +657,8 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
         data_v->obj_v[i].NeighborCountWithinHalfD = new int[data_v->key_n]();
     }
 
-// 	//*we iterate each object that contain frequent labels
-//     // for each object
+	//*we iterate each object that contain frequent features
+    // for each object
     for (int i = 0; i < data_v->obj_n; i++) {
 		
 		FEA_TYPE fea = data_v->obj_v[i].fea;

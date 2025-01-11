@@ -111,7 +111,7 @@ void colocation()
         if (cfg->alg_opt == 1) {
             result = joinless_mining(data_v, cfg->obj_n, cfg->key_n);
         } else if (cfg->alg_opt == 2) {
-            result = apriori(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr);
+            result = improved(cfg->alg_opt, cfg->obj_n, cfg->key_n, cfg->dist_thr);
         }else {
             exit(EXIT_FAILURE);  
         }

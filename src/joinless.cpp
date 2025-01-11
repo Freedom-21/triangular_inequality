@@ -10,13 +10,13 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
     unordered_map<FEA_TYPE, vector<obj_set_t*>*> SN;
 
     fsi_set_t** result; //storing overall result
-    fsi_set_t* fsi_set_cur; //prev = L_{k-1}, cur = L_{k}
+    fsi_set_t* fsi_set_cur; //prev = P_{k-1}, cur = P_{k}
     fsi_t *fsi_v1, *fsi_v2, *fsi_v3;
     FEA_TYPE fea_v1;
-    B_KEY_TYPE sup;
+    B_KEY_TYPE PI;
     int i;
 
-    //Initialize the structure for storing L_1, L_2, ..., L_{|F|}
+    //Initialize the structure for storing results like P_1, P_2, ..., P_{|F|}
     result = (fsi_set_t**)malloc(numOfFea * sizeof(fsi_set_t*));
     memset(result, 0, numOfFea * sizeof(fsi_set_t*));
 
@@ -41,8 +41,8 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
     GetCurTime(&query_sta);
 #endif
 
-    //L_1
-    result[0] = const_L1_apriori();
+    //pattern size 1
+    result[0] = size_one_patterns();
 
 #ifndef WIN32
     GetCurTime(&query_end);
@@ -51,7 +51,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
     printf("Pattern_1 \ttime:%0.5lf\n", usr_t);
     GetCurTime(&query_sta);
 #endif
-    //L_(i+1)
+    //P_(i+1)
     for (i = 1; i < numOfFea; i++) {
         fsi_v1 = result[i - 1]->head->next;
         if (fsi_v1 == NULL)
@@ -61,11 +61,11 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
         while (fsi_v1->next != NULL) {
             fsi_v2 = fsi_v1->next;
             while (fsi_v2 != NULL) {
-                //join step.
+                //apriori kind join step.
                 if ((fea_v1 = join_check(fsi_v1, fsi_v2)) != -1) {
                     fsi_v3 = add_fsi(fsi_v1, fea_v1);
 
-                    //prune step.
+                    //prune if all subsets doesn't exit
                     if (i > 1 && !all_subsets_exist(result[i - 1], fsi_v3)) {
                         /*s*/
                         stat_v.memory_v -= sizeof(fsi_t) + fsi_v3->fea_n * sizeof(FEA_TYPE);
@@ -79,10 +79,9 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                     check_star_instance(fsi_v3, SN);
 
                     if (fsi_v3->fea_n > 2) {
-                        // if (cost_tag == 1) //participation based
-                        sup = comp_PI(fsi_v3, NULL);
+                        PI = comp_PI(fsi_v3, NULL);
 
-                        if (sup < min_pi) {
+                        if (PI < min_pi) {
                             //fsi_v3 is not a frequent pattern
                             for (auto i = fsi_v3->obj_set_list_v->begin(); i != fsi_v3->obj_set_list_v->end(); ++i)
                                 release_obj_set(*i);
@@ -100,13 +99,9 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                         filter_clique_instance(fsi_v3, result[i - 1], fsi_v3->obj_set_list_v);
                     }
                     //count step.
-                    // if (cost_tag == 1) //participation based
-                    sup = comp_PI(fsi_v3, NULL);
-                    // else //fraction based
-                    //     sup = comp_sup(fsi_v3, NULL);
+                    PI = comp_PI(fsi_v3, NULL);
 
-                    //----------------------------
-                    if (sup >= min_pi)
+                    if (PI >= min_pi)
                         add_fsi_set_entry(fsi_set_cur, fsi_v3);
                     else {
                         //fsi_v3 is not a frequent pattern
@@ -133,20 +128,6 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
         printf("Pattern_%d\ttime:%0.5lf\t # of colocation patterns:%d\n", i + 1, usr_t, fsi_set_cur->fsi_n);
         GetCurTime(&query_sta);
 #endif
-        /*t*/
-        //print out each level for debug
-        // if (debug_mode) {
-        //     printf("P_%d\n", i + 1);
-        //     int cnt = 0;
-        //     fsi_t* fsi_v = fsi_set_cur->head->next;
-        //     while (fsi_v != NULL) {
-        //         print_fsi(fsi_v, stdout);
-
-        //         fsi_v = fsi_v->next;
-        //         cnt++;
-        //     }
-        // }
-        //printf("L_%d: %d\n",i+1, fsi_set_cur->fsi_n);
         result[i] = fsi_set_cur;
     }
 
@@ -261,11 +242,6 @@ void check_star_instance(fsi_t* fsi_v, unordered_map<FEA_TYPE, vector<obj_set_t*
     bst_t* inverted_list;
     psi_t* psi_v;
 
-    //    if(fsi_v->fea_n==3)
-    //    {
-    //        print_fsi(fsi_v, stdout);
-    //    }
-
     //finding star neighborhoods with the first feature in fsi_v
     auto got = SN.find(fsi_v->feaset[0]);
     if (got == SN.end()) {
@@ -289,11 +265,6 @@ void check_star_instance(fsi_t* fsi_v, unordered_map<FEA_TYPE, vector<obj_set_t*
         obj_set_list_temp = filter_star_instance(obj_set_v->head->next->obj_v, inverted_list);
         release_IF(inverted_list);
 
-        /*t*/
-        //        for (auto j = obj_set_list_temp->begin(); j != obj_set_list_v->end(); ++j)
-        //            print_obj_set(*j, stdout);
-        /*t*/
-
         //append obj_set_list_temp to fsi_v->obj_set_list_v for k+1 to filter clique instance
         if (fsi_v->obj_set_list_v == NULL) {
             fsi_v->obj_set_list_v = obj_set_list_temp;
@@ -308,12 +279,6 @@ void check_star_instance(fsi_t* fsi_v, unordered_map<FEA_TYPE, vector<obj_set_t*
     return;
 }
 
-/*
- * generate star instances
- * @obj_v: first object in the instance
- * @inverted_list: generated from the corresponding star neighborhood
- * return @obj_set_list_v: start instances each involves @obj_v
- */
 vector<obj_set_t*>* filter_star_instance(obj_t* obj_v, bst_t* inverted_list)
 {
     vector<obj_set_t*>* obj_set_list_v;
@@ -392,9 +357,6 @@ void filter_star_instance_sub(bst_t* IF_v, obj_set_t* S_0, vector<obj_set_t*>* o
     return;
 }
 
-//for each obj_set_v in fsi_cur->obj_set_list_v, check clique instance for objects except the one with fsi_cur->feaset[0]
-//remove it from the list if not clique
-//checking can be done by searching C_k-1
 void filter_clique_instance(fsi_t* fsi_cur, fsi_set_t* fsi_set_v, vector<obj_set_t*>* obj_set_list_v)
 {
     fsi_t* fsi_v;
@@ -477,9 +439,6 @@ bool check_obj_set_equal(obj_set_t* v1, obj_set_t* v2, FEA_TYPE fea)
     return true;
 }
 
-/*
- *  Output: @sup = sup(C)
- */
 B_KEY_TYPE comp_PI(fsi_t* fsi_v, obj_set_t* O)
 {
 
@@ -516,7 +475,7 @@ B_KEY_TYPE comp_PI(fsi_t* fsi_v, obj_set_t* O)
             participation_index = participation_ratio;
     }
 
-    fsi_v->sup = participation_index;
+    fsi_v->PI = participation_index;
 
     return participation_index;
 }
