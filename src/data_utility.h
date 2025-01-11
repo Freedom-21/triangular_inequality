@@ -20,7 +20,7 @@ using namespace std;
 #define TEXT_COL_MAX			1075
 #define MAX_FILENAME_LENG		256	
 
-#define	CONFIG_FILE				"IRTree_config.txt"
+#define	CONFIG_FILE				"RTree_config.txt"
 #define	COLOCATION_CONFIG_FILE	"param.txt"
 #define	COLOCATION_STAT_FILE	"usages.txt"
 #define	COLOCATION_RESULT_FILE	"patterns.txt"
@@ -50,7 +50,7 @@ typedef	struct
     
     char	tree_file[ MAX_FILENAME_LENG];
         
-}	IRTree_config_t;
+}	RTree_config_t;
 
 
 //The structure for storing the configuration information for the co-location pattern mining problem.

@@ -6,7 +6,7 @@
 #include "improved.h"
 
 extern  float dist_thr;
-extern IRTree_t IRTree_v;
+extern RTree_t RTree_v;
 
 
 loc_t* alloc_loc( int dim);

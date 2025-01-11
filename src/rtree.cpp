@@ -16,7 +16,7 @@ void CreateNode( node_t* &pnode)
 	float tmp = stat_v.memory_v;
 	/*s*/
 
-	//IR-tree augmentation.
+	//RTree augmentation.
 	pnode->bst_v = bst_ini( );
 
 	/*s*/
@@ -42,7 +42,7 @@ void ReleaseNode( node_t* pnode, int tag)
 			free( pnode->MBRs[ i]);
 
 		/*s*/
-		stat_v.tree_memory_v -= IRTree_v.dim * sizeof( range);
+		stat_v.tree_memory_v -= RTree_v.dim * sizeof( range);
 		/*s*/
 	}
 
@@ -79,7 +79,7 @@ int IsOverlapped(range* MBR, range* obj)
 {
 	int  i, tag;
 	tag = 0;
-	for( i=0; i<IRTree_v.dim; i++)	//Travel each dimension.
+	for( i=0; i<RTree_v.dim; i++)	//Travel each dimension.
 	{
 		//Departed;
 		if( MBR[ i].min > obj[ i].max ||
@@ -109,7 +109,7 @@ int IsOverlapped(range* MBR, range* obj)
 bool IsSame( range* MBR1, range* MBR2)
 {
 	int i;
-	for( i=0; i<IRTree_v.dim; i++)
+	for( i=0; i<RTree_v.dim; i++)
 	{
 		if( !(MBR1[i].max == MBR2[i].max && 
 			MBR1[i].min == MBR2[i].min))
@@ -130,7 +130,7 @@ void calc_MBR( node_t* pnode, range* &MBR)
 {
 	//The interface of "MBR" is due to the R-tree implementation.
 	int i, j;
-	for( j=0; j<IRTree_v.dim; j++)         //dimensions.
+	for( j=0; j<RTree_v.dim; j++)         //dimensions.
 	{
 		MBR[j].min = FLT_MAX;
 		MBR[j].max = -FLT_MAX;
@@ -173,10 +173,10 @@ double GetArea( node_t* pnode)
 	double area;
 	range* MBR;
 
-	MBR = get_MBR_node( pnode, IRTree_v.dim);
+	MBR = get_MBR_node( pnode, RTree_v.dim);
 
 	area = 1;
-	for(i=0; i<IRTree_v.dim; i++)
+	for(i=0; i<RTree_v.dim; i++)
 		area *= MBR[i].max - MBR[i].min;
 
 	free( MBR);
@@ -197,7 +197,7 @@ double GetArea_2( range* MBR1, range* MBR2)
 	int i;
 
 	area = 1;
-	for( i=0; i<IRTree_v.dim; i++)
+	for( i=0; i<RTree_v.dim; i++)
 	{	
 		high = MBR1[i].max >= MBR2[i].max ? MBR1[i].max : MBR2[i].max;
 		low = MBR1[i].min <= MBR2[i].min ? MBR1[i].min : MBR2[i].min;
@@ -249,8 +249,8 @@ void NeedLeastArea( node_t* pnode, range* obj, int& loc)
 	range* MBR, *MBR_tmp;
 
 	//use MBR_tmp to denote the enlarged MBRangle.
-	MBR_tmp = ( range*)malloc( IRTree_v.dim * sizeof( range));
-	memset( MBR_tmp, 0, IRTree_v.dim * sizeof( range));
+	MBR_tmp = ( range*)malloc( RTree_v.dim * sizeof( range));
+	memset( MBR_tmp, 0, RTree_v.dim * sizeof( range));
 
 	loc = 0;
 	min_inc_area = DBL_MAX;
@@ -259,7 +259,7 @@ void NeedLeastArea( node_t* pnode, range* obj, int& loc)
 		ori = 1;
 		enl = 1;
 		MBR = pnode->MBRs[i];
-		for( j=0; j<IRTree_v.dim; j++)              //dimensions
+		for( j=0; j<RTree_v.dim; j++)              //dimensions
 		{
 			MBR_tmp[ j].min = MBR[ j].min <= obj[ j].min ?
 				MBR[ j].min : obj[ j].min;
@@ -305,7 +305,7 @@ bool UpdateMRB( node_t* pnode, range* &MBR)
 	bool res;
 
 	res = false;
-	for( i=0; i<IRTree_v.dim; i++)		//dimensions.
+	for( i=0; i<RTree_v.dim; i++)		//dimensions.
 	{
 		min = FLT_MAX;
 		max = -FLT_MAX;
@@ -376,7 +376,7 @@ void PickSeeds( node_t* pnode, range* MBR, int& g1, int& g2)
 				area1 = 1;
 				area2 = 1;
 
-				for(k=0; k<IRTree_v.dim; k++)
+				for(k=0; k<RTree_v.dim; k++)
 				{	
 					//MBR_tmp is used to enclose the two MBRs: MBR1, MBR2.
 					MBR_tmp->max = (MBR1[k].max >= MBR2[k].max)? MBR1[k].max : MBR2[k].max;
@@ -493,8 +493,8 @@ void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt)
 	if( pnode->level > 0)
 	{	
 		//The inserted is a subtree.
-		MBR = ( range*)malloc( IRTree_v.dim * sizeof( range));
-		memset( MBR, 0, IRTree_v.dim * sizeof( range));
+		MBR = ( range*)malloc( RTree_v.dim * sizeof( range));
+		memset( MBR, 0, RTree_v.dim * sizeof( range));
 
 		calc_MBR( ( node_t*)obj, MBR);
 	}
@@ -620,12 +620,12 @@ node_t* CreateNewRoot( node_t* node_1, node_t* node_2)
 		nRoot->child[ i] = ( node_t*)malloc( sizeof(node));
 		memset( nRoot->child[ i], 0, sizeof( node));
 
-		nRoot->MBRs[ i] = ( range*)malloc( IRTree_v.dim * sizeof( range));
-		memset( nRoot->MBRs[ i], 0, IRTree_v.dim * sizeof( range));
+		nRoot->MBRs[ i] = ( range*)malloc( RTree_v.dim * sizeof( range));
+		memset( nRoot->MBRs[ i], 0, RTree_v.dim * sizeof( range));
 	}
 
 	/*s*/
-	stat_v.tree_memory_v += 2 * ( sizeof( node) + IRTree_v.dim * sizeof( range));
+	stat_v.tree_memory_v += 2 * ( sizeof( node) + RTree_v.dim * sizeof( range));
 	if( stat_v.tree_memory_v > stat_v.tree_memory_max)
 		stat_v.tree_memory_max = stat_v.tree_memory_v;
 	/*s*/
@@ -643,7 +643,7 @@ node_t* CreateNewRoot( node_t* node_1, node_t* node_2)
 
 	const_IF( nRoot);
 
-	IRTree_v.inner_n ++;
+	RTree_v.inner_n ++;
 
 	return nRoot;
 }
@@ -659,15 +659,15 @@ node_t* InsertSub( node_t* pnode, void* obj)
 		if( pnode->level > 0)
 		{
 			//iner-node case.
-			pnode->MBRs[ pnode->num] = ( range*)malloc( IRTree_v.dim * sizeof( range));
-			memset( pnode->MBRs[ pnode->num], 0, IRTree_v.dim * sizeof( range));
+			pnode->MBRs[ pnode->num] = ( range*)malloc( RTree_v.dim * sizeof( range));
+			memset( pnode->MBRs[ pnode->num], 0, RTree_v.dim * sizeof( range));
 			
 			calc_MBR( ( node_t*)obj, pnode->MBRs[ pnode->num]);
 			( (node_t*)obj)->parent = pnode;
 			( (node_t*)obj)->loc = pnode->num;                      //bug.
 
 			/*s*/
-			stat_v.tree_memory_v += IRTree_v.dim * sizeof( range);
+			stat_v.tree_memory_v += RTree_v.dim * sizeof( range);
 			if( stat_v.tree_memory_v > stat_v.tree_memory_max)
 				stat_v.tree_memory_max = stat_v.tree_memory_v;
 			/*s*/
@@ -689,19 +689,19 @@ node_t* InsertSub( node_t* pnode, void* obj)
 
 		return NULL;
 
-	}//pnode->num < IRTree_v.
+	}//pnode->num < RTree_v.
 	else
 	{
 		//No free room for the inserted object, need split node.
 		node_t* node_2;
 		
 		//SplitNode: QuadraticSplit.
-		SplitNode( pnode, node_2, obj, IRTree_v.split_opt);
+		SplitNode( pnode, node_2, obj, RTree_v.split_opt);
 
 		if( pnode->level == 0)
-			IRTree_v.leaf_n ++;
+			RTree_v.leaf_n ++;
 		else
-			IRTree_v.inner_n ++;
+			RTree_v.inner_n ++;
 
 		//Construct the IFs for the newly-created nodes.
 		const_IF( pnode);
@@ -758,15 +758,15 @@ void Insert( obj_t* obj)
 {
 	node_t* pnode, *res;
 
-	ChooseLeaf( IRTree_v.root, obj->MBR, pnode);
+	ChooseLeaf( RTree_v.root, obj->MBR, pnode);
     ///pnode is the node the insert in
 	res = InsertSub( pnode, obj );
 
 	if( res != NULL)
 	{	
 		//The root has been changed.
-		IRTree_v.root = res;
-		IRTree_v.height ++;
+		RTree_v.root = res;
+		RTree_v.height ++;
 	}
 
 	return;
@@ -914,9 +914,9 @@ void CondenseSub( node_t* pnode, objPointer* h1, nodePointer* h2 )
 		ReleaseNode( pnode, 1);
 
 		if( pnode->level == 0)
-			IRTree_v.leaf_n --;
+			RTree_v.leaf_n --;
 		else
-			IRTree_v.inner_n --;
+			RTree_v.inner_n --;
 
 		//Condense upward recursively.
 		CondenseSub( pParent, h1, h2);
@@ -953,12 +953,12 @@ void CondenseTree( node_t* pnode)
 	while( h1 != NULL)
 	{
 			node_t* lnode, *res;
-			ChooseLeaf( IRTree_v.root, h1->p->MBR, lnode);
+			ChooseLeaf( RTree_v.root, h1->p->MBR, lnode);
 			res = InsertSub( lnode, h1->p);
 			if( res)
 			{
-				IRTree_v.root = res;
-				IRTree_v.height ++;
+				RTree_v.root = res;
+				RTree_v.height ++;
 			}
 
 		free(h1);
@@ -979,13 +979,13 @@ void CondenseTree( node_t* pnode)
 	{
 			node_t* inNode, *res;
 
-			ChooseInner( IRTree_v.root, h2->p, inNode);
+			ChooseInner( RTree_v.root, h2->p, inNode);
 			res = InsertSub( inNode, h2->p);
 			if( res)
 			{
 				//The root has been changed.
-				IRTree_v.root = res;
-				IRTree_v.height ++;
+				RTree_v.root = res;
+				RTree_v.height ++;
 			}
 
 		free(h2);
@@ -1008,7 +1008,7 @@ int Delete( obj_t* obj)
 	node_t* lnode, *root;
 	obj_t* oTmp;
 
-	root = IRTree_v.root;
+	root = RTree_v.root;
 	lnode = Search( root, obj->MBR, loc);
 
 	if( lnode == NULL)
@@ -1021,7 +1021,7 @@ int Delete( obj_t* obj)
 	lnode->child[ loc] = lnode->child[ lnode->num-1];
 	lnode->MBRs[ loc] = lnode->MBRs[ lnode->num-1];
 	lnode->num --;
-	IRTree_v.obj_n --;
+	RTree_v.obj_n --;
 
 	free( oTmp->MBR);
 	free( oTmp);
@@ -1030,23 +1030,23 @@ int Delete( obj_t* obj)
 	CondenseTree( lnode);
 	
 	//Update the level if necessary (the root has only one child).
-	if( IRTree_v.root->num == 1 && IRTree_v.root->level > 0)
+	if( RTree_v.root->num == 1 && RTree_v.root->level > 0)
 	{
-		lnode = IRTree_v.root; 
-		IRTree_v.root = ( node_t*)( IRTree_v.root->child[0]);
-		IRTree_v.root->parent = NULL;
-		IRTree_v.root->loc = 0;
-		IRTree_v.height --;
+		lnode = RTree_v.root; 
+		RTree_v.root = ( node_t*)( RTree_v.root->child[0]);
+		RTree_v.root->parent = NULL;
+		RTree_v.root->loc = 0;
+		RTree_v.height --;
 
 		//Release the original root node.
 		ReleaseNode( lnode, 1);
 
-		IRTree_v.inner_n --;
+		RTree_v.inner_n --;
 	}
-	else if( IRTree_v.root->num == 0)
+	else if( RTree_v.root->num == 0)
 	{	
 		//Extreme case.
-		IRTree_v.height = 0;
+		RTree_v.height = 0;
 	}
 
 	return 1;
@@ -1058,10 +1058,10 @@ int Delete( obj_t* obj)
 
 void ini_tree( )
 {
-	memset( &IRTree_v, 0, sizeof( IRTree_t));
+	memset( &RTree_v, 0, sizeof( RTree_t));
 
-	CreateNode( IRTree_v.root);
-	IRTree_v.leaf_n ++;
+	CreateNode( RTree_v.root);
+	RTree_v.leaf_n ++;
 }
 
 /*
@@ -1093,26 +1093,26 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 	fprintf( fp, "                                                  R-Tree Information\n");
 	fprintf( fp, "M\tm\tInner-nodes\tLeaf-nodes\tObjects\tDimension\n");
 	fprintf( fp, "%i\t%i\t%i\t\t\t%i\t\t%i\t%i\n\n", 
-				M, m1, IRTree_v.inner_n, IRTree_v.leaf_n, IRTree_v.obj_n, IRTree_v.dim);
+				M, m1, RTree_v.inner_n, RTree_v.leaf_n, RTree_v.obj_n, RTree_v.dim);
 	fprintf( fp, "num   level   loc addr              parent\n");
 	
 	int sta, rear;
 	node *c_node, *root;
 	node_t** queue;
 
-	queue = ( node_t**)malloc( ( IRTree_v.obj_n + 1) * sizeof( node_t*));
-	memset( queue, 0, ( IRTree_v.obj_n + 1) * sizeof( node_t*));
+	queue = ( node_t**)malloc( ( RTree_v.obj_n + 1) * sizeof( node_t*));
+	memset( queue, 0, ( RTree_v.obj_n + 1) * sizeof( node_t*));
 	
 	sta = rear = 0;
-	root = IRTree_v.root;
+	root = RTree_v.root;
 	queue[ rear] = root;
-	rear = ( rear + 1) % ( IRTree_v.obj_n + 1);	//macro's pit.
+	rear = ( rear + 1) % ( RTree_v.obj_n + 1);	//macro's pit.
 
 	inner_cnt = leaf_cnt = 0;
 	while( sta != rear)
 	{
 		c_node = queue[ sta];
-		sta = ( sta + 1) % ( IRTree_v.obj_n + 1);
+		sta = ( sta + 1) % ( RTree_v.obj_n + 1);
 
 		if( c_node->level == 0)
 			leaf_cnt ++;
@@ -1137,7 +1137,7 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 		fprintf( fp, "\n");
 		
 		//Print the 'child' and 'MBR' info.
-		for( j=0; j<IRTree_v.dim; j++)
+		for( j=0; j<RTree_v.dim; j++)
 		{	
 			min = FLT_MAX;
 			max = -FLT_MAX;
@@ -1177,7 +1177,7 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 			for(i=0; i<c_node->num; i++)
 			{
 				queue[ rear] = ( node_t*)( c_node->child[i]);
-				rear = ( rear + 1) % ( IRTree_v.obj_n + 1);	//macro's pit.
+				rear = ( rear + 1) % ( RTree_v.obj_n + 1);	//macro's pit.
 
 				//Test the 'loc' and 'level' information.
 /*t*/
@@ -1196,9 +1196,9 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 	if( o_tag == 1)
 		fclose( fp);
 
-	if( IRTree_v.inner_n != inner_cnt)
+	if( RTree_v.inner_n != inner_cnt)
 		printf( "Inconsistent inner_n info!\n");
-	if( IRTree_v.leaf_n != leaf_cnt)
+	if( RTree_v.leaf_n != leaf_cnt)
 		printf( "Inconsistent leaf_n info!\n");
 
 	return true;
@@ -1207,23 +1207,23 @@ bool print_and_check_tree( int o_tag, const char* tree_file)
 /*---------------------Added APIs-2011-03-09------------------------*/
 
 /*
-*	build_IRTree constructs the IR-tree based on the data file.
+*	build_RTree constructs the RTree based on the data file.
 */
-void build_IRTree( data_t* data_v)
+void build_RTree( data_t* data_v)
 {
 	int i;
     printf("initilizing tree\n");
-	//Initialize a IR-tree.
+	//Initialize a RTree.
 	ini_tree( );
-	IRTree_v.dim = data_v->dim;
+	RTree_v.dim = data_v->dim;
     printf("inserting objects\n");
 	
-	//Insert all the objects to construct the IR-tree.
+	//Insert all the objects to construct the RTree.
 	for( i=0; i<data_v->obj_n; i++)
 	{
         Insert(data_v->obj_v + i);
         // printf("%d\t",(data_v->obj_v + i)->id);
-		IRTree_v.obj_n ++;
+		RTree_v.obj_n ++;
 	}
 }
 /*
@@ -1264,7 +1264,7 @@ void print_IF( node_t* node_v, FILE* fp, int p_tag)
 	fprintf( fp, "-1\n");
 }
 
-/*---------------------IR-tree augmentation APIs------------------------*/
+/*---------------------RTree augmentation APIs------------------------*/
 
 /*
  *	Get the keywords from a keyword list.

@@ -32,13 +32,8 @@ typedef struct obj
     int* NeighborCountWithinD;
     int* NeighborCountWithinHalfD;
 
-    double* distance_bounds;  
+    // double* distance_bounds;  
 }	obj_t;
-
-struct combined_obj_set_t {
-    std::vector<obj_t*> colocated_objects;
-}; // added only to print colocation instances on improved algo
-
 
 //The structure for storing a set of features.
 typedef struct fsi
@@ -47,9 +42,7 @@ typedef struct fsi
     FEA_TYPE*	feaset; //array
     B_KEY_TYPE  sup;
     struct fsi* next;   //use when fsi_t in fsi_set_t
-    std::vector<struct obj_set *>* obj_set_list_v; //For joinless
-    std::vector<combined_obj_set_t*>* combined_obj_sets_v; // If we want to generate colocation instances
-    
+    std::vector<struct obj_set *>* obj_set_list_v; //For joinless    
 }	fsi_t;
 
 

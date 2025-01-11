@@ -270,7 +270,7 @@ void range_query_sub(node_t* node_v, disk_t* disk_v, obj_set_t*& obj_set_v)
     range* MBR;
 
     if (node_v->parent == NULL)
-        MBR = get_MBR_node(node_v, IRTree_v.dim);
+        MBR = get_MBR_node(node_v, RTree_v.dim);
     else
         MBR = node_v->parent->MBRs[node_v->loc];
 
@@ -285,7 +285,7 @@ void range_query_sub(node_t* node_v, disk_t* disk_v, obj_set_t*& obj_set_v)
             free(MBR);
 
             /*s*/
-            stat_v.memory_v -= IRTree_v.dim * sizeof(range);
+            stat_v.memory_v -= RTree_v.dim * sizeof(range);
             /*s*/
         }
 
@@ -310,7 +310,7 @@ void range_query_sub(node_t* node_v, disk_t* disk_v, obj_set_t*& obj_set_v)
     if (node_v->parent == NULL) {
         free(MBR);
         /*s*/
-        stat_v.memory_v -= IRTree_v.dim * sizeof(range);
+        stat_v.memory_v -= RTree_v.dim * sizeof(range);
         /*s*/
     }
 }
@@ -320,7 +320,7 @@ obj_set_t* range_query(disk_t* disk_v)
     obj_set_t* obj_set_v;
 
     obj_set_v = alloc_obj_set();
-    range_query_sub(IRTree_v.root, disk_v, obj_set_v);
+    range_query_sub(RTree_v.root, disk_v, obj_set_v);
 
     return obj_set_v;
 }

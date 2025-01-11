@@ -1,22 +1,15 @@
-#ifndef IRTREE_H
-#define IRTREE_H
+#ifndef RTREE_H
+#define RTREE_H
 
 #include "bit_operator.h"
-// #include "data_struct_operation.h"
 #include "bst.h"
 #include "data_utility.h"
 #include "data_struct.h"
-
-//#define IRTree_OR_R_STAR_TREE	1
 
 #define M				32
 #define m1				20
 
 #define MAX_LINE_LENG	1027
-
-//#define DATA_FILE		"IRTree_DataFile.txt"		//
-#define SAVE_FILE		"IRTree.txt"				//savefile of rtree.
-
 
 //The node structure of the node of the rtree.
 typedef struct node         
@@ -33,7 +26,7 @@ typedef struct node
 }	node_t;
 
 //The info structure of the rtree.
-typedef struct	IRTree
+typedef struct	RTree
 {
 	int		dim;
 	
@@ -45,7 +38,7 @@ typedef struct	IRTree
 
 	int		inner_n;		//the number of inner-nodes.
 	int		leaf_n;			//the number of leaf-nodes.
-}	IRTree_t;
+}	RTree_t;
 
 //
 struct objPointer	//typedef 
@@ -62,135 +55,62 @@ struct nodePointer	//typedef
 };
 
 
-extern IRTree_t IRTree_v;
+extern RTree_t RTree_v;
 	
 
 /*---------------------Calculation Related APIs----------------------*/
 
-//double abs( double var);
 
 void CreateNode( node_t* &pnode);
-
 void ReleaseNode( node_t* pnode, int tag);
-
 int IsOverlapped( range* MBR1, range* MBR2);
-
 bool IsSame( range* MBR1, range* MBR2);
-
 double GetArea( node_t* pnode);	
-
 double GetArea_2( range* MBR1, range* MBR2);
-
 double GetIncArea( node_t* pnode, range* MBR);
-
 void NeedLeastArea( node_t* pnode, range* obj, int& loc);
-
 void calc_MBR( node_t* pnode, range* &MBR);
-
 range* get_MBR_node( node_t* pnode, int dim);
-
 bool UpdateMRB( node_t* pnode, range* &MBR);
  
 /*----------------------Insertion related APIs----------------------*/
 
 void ChooseLeaf( node_t* root, range* MBR, node_t* &leaf_node);
-
 void PickSeeds( node_t* pnode, range* MBR, int& g1, int& g2);
-
-void LinearPickSeeds( node_t* pnode, range* MBR, int& g1, int& g2);
-
 int PickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, range* MBR, bool* done, int rTag);
-
-int LinearPickNext( node_t* pnode, node_t* node_1, node_t* node_2, node_t* &node_c, bool* done, int rTag);
-
 void AssignEntry( node_t* pnode, node_t* node_c, void* obj, range* MBR);
-
 void SplitNode( node_t* &pnode, node_t* &node_2, void* obj, int opt);
-
 void AdjustTree( node_t* pnode);
-
 node_t* CreateNewRoot( node_t* node_1, node_t* node_2);
-
 node_t* InsertSub( node_t* pnode, void* obj);
-
 void Insert( obj_t* obj);
 
 /*---------------------Deletion Related APIs------------------------*/
 
 node_t* Search( node_t* root, range* MBR, int& loc);
-
 void ChooseInner( node_t* root, range* MBR, node_t* &inner_node);
-
 void CondenseSub( node_t* pnode, objPointer* h1, nodePointer* h2 );
-
 void CondenseTree( node_t* pnode);
-
 int Delete( obj_t* obj); 
 
 /*---------------------Other Operation APIs------------------------*/
 
 void ini_tree( );
-
 bool print_and_check_tree( int o_tag, const char* tree_file);
-
-void read_node( FILE* i_fp, node_t* node_v);
-
-obj_t* const_obj( node_t* node_v, int loc, int& id_cnt);
-
-void read_tree( char* ir_tree_f);
-
-void build_IRTree( data_t* data_v);
-
-void free_IRTree_sub( );
-
-void free_IRTree( );
-
-//void bp_free_IRTree( );
-
-bool loc_to_key( int key, int loc, node_t* node_v);
-
-bool loc_oriented_check( node_t* node_v);
-
-bool key_to_loc( int key, int loc, node_t* node_v);
-
-bool key_oriented_check( node_t* node_v);
-
-bool check_IF_sub( node_t* node_v);
-
-void check_IF( );
-
+void build_RTree( data_t* data_v);
 void print_IF( node_t* node_v, FILE* fp, int tag);
 
-void print_MBR( range* MBR, int dim);
-
-void test_IRTree( int o_tag);
-
-/*---------------------IR-tree augmentation APIs------------------------*/
+/*---------------------RTree augmentation APIs------------------------*/
 
 k_node_t* collect_keywords_list( k_node_t* k_head);
-
 k_node_t* collect_keywords_bst( bst_t* bst_v);
-
 k_node_t* collect_keywords_fea(FEA_TYPE fea);
 
 //void release_k_list( k_node_t* k_head);
 
 int add_IF_entry( bst_t* bst_v, KEY_TYPE key, int loc);
-
 void adjust_IF( node_t* c_node, void* obj, int loc);
-
 void const_IF( node_t* node_v);
-
-void delete_loc_IF( bst_t* bst_v, int loc);
-
 void adjust_parent_IF( node_t* p_node, int loc);
-
-data_t*	IRTree_read_data( IRTree_config_t* cfg);
-
-void IRTree_free_data( data_t* data_v);
-
-//Generate the IR-trees of the datasets.
-void gen_rtree( );
-
 
 #endif

@@ -1,11 +1,11 @@
-R-tree Build Time: 0.000315 seconds
-Average Query Time: 0.000990 seconds
+R-tree Build Time: 0.000399 seconds
+Average Query Time: 0.000933 seconds
 
 Memory usage (MB)	R-tree memory usage (MB)
-0.00			0.00
+0.01			0.00
 
 Method			Count			Time (seconds)
-Check 1			64			0.000095
-Check 2			0			0.000005
-Check 3			6			0.000110
-Check 4			3			0.000076
+Check 1			0			0.000000
+Check 2			0			0.000000
+Check 3			0			0.000000
+Check 4			0			0.000000

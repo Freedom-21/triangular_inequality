@@ -1,16 +1,8 @@
-
 #include "improved.h"
-// #include "distance_cache.h"
-#include "data_struct.h" // Ensure this is included if not already
+#include "data_struct.h" // whattttt now
 #include <cassert>
 #include <limits>
 
-
-// int determine_max_feature_id(data_t* data_v);
-
-/*
- *  [Apriori]
- */
 fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
 {
     printf("Starting Improved Algorithm with, objects=%d, Features=%d, dist_thr=%.5f\n", numOfObj, numOfFea, dist_thr);
@@ -366,7 +358,7 @@ bool combinatorial(fsi_t* fsi_v, obj_t* obj_v, obj_set_t* S2, bool* RI)
     // Step 1. Range query.
 
     loc_v = get_obj_loc(obj_v);
-    disk_v = alloc_disk(IRTree_v.dim);
+    disk_v = alloc_disk(RTree_v.dim);
     set_disk(disk_v, loc_v, dist_thr);
 
     q = alloc_query();
@@ -727,7 +719,7 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
         // 2. find all objects in range D(o,d)
         loc_v = get_obj_loc(&data_v->obj_v[i]);
 
-        disk_v = alloc_disk(IRTree_v.dim);
+        disk_v = alloc_disk(RTree_v.dim);
         set_disk(disk_v, loc_v, dist_thr);
 
         obj_set_v = range_query(disk_v);

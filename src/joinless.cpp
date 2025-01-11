@@ -135,17 +135,17 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
 #endif
         /*t*/
         //print out each level for debug
-        if (debug_mode) {
-            printf("P_%d\n", i + 1);
-            int cnt = 0;
-            fsi_t* fsi_v = fsi_set_cur->head->next;
-            while (fsi_v != NULL) {
-                print_fsi(fsi_v, stdout);
+        // if (debug_mode) {
+        //     printf("P_%d\n", i + 1);
+        //     int cnt = 0;
+        //     fsi_t* fsi_v = fsi_set_cur->head->next;
+        //     while (fsi_v != NULL) {
+        //         print_fsi(fsi_v, stdout);
 
-                fsi_v = fsi_v->next;
-                cnt++;
-            }
-        }
+        //         fsi_v = fsi_v->next;
+        //         cnt++;
+        //     }
+        // }
         //printf("L_%d: %d\n",i+1, fsi_set_cur->fsi_n);
         result[i] = fsi_set_cur;
     }
@@ -185,7 +185,7 @@ unordered_map<FEA_TYPE, vector<obj_set_t*>*> gen_star_neighborhoods(data_t* data
         //find all objects in range D(o,d)
         loc_v = get_obj_loc(obj_v);
 
-        disk_v = alloc_disk(IRTree_v.dim);
+        disk_v = alloc_disk(RTree_v.dim);
         set_disk(disk_v, loc_v, dist_thr);
 
         obj_set_v = range_query(disk_v);

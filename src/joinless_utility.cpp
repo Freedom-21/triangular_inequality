@@ -26,8 +26,8 @@ loc_t* get_obj_loc( obj_t* obj_v)
 	int i;
 	loc_t* loc_v;
 
-	loc_v = alloc_loc( IRTree_v.dim);
-	for( i=0; i<IRTree_v.dim; i++)
+	loc_v = alloc_loc( RTree_v.dim);
+	for( i=0; i<RTree_v.dim; i++)
 		loc_v->coord[ i] = obj_v->MBR[ i].min;
 	
 	return loc_v;
@@ -184,7 +184,7 @@ query_t* read_query( FILE* i_fp)
 
 	q = alloc_query( );
 
-	q->loc_v = alloc_loc( IRTree_v.dim);
+	q->loc_v = alloc_loc( RTree_v.dim);
 	q->psi_v = alloc_psi( );
 
 	//Location.
@@ -194,7 +194,7 @@ query_t* read_query( FILE* i_fp)
 		return NULL;
 	}
 
-	for( i=1; i<IRTree_v.dim; i++)
+	for( i=1; i<RTree_v.dim; i++)
 		fscanf( i_fp, "%c%f", &des, &q->loc_v->coord[ i]);
 
 	//Keywords.
@@ -267,10 +267,10 @@ disk_t* const_disk( loc_t* loc_v, B_KEY_TYPE radius)
 	disk_t* disk_v;
 
 
-	disk_v = alloc_disk( IRTree_v.dim);
-	for( i=0; i<IRTree_v.dim; i++)
+	disk_v = alloc_disk( RTree_v.dim);
+	for( i=0; i<RTree_v.dim; i++)
 		disk_v->center->coord[ i] = loc_v->coord[ i];
-	disk_v->center->dim = IRTree_v.dim;
+	disk_v->center->dim = RTree_v.dim;
 
 	disk_v->radius = radius;
 
@@ -637,7 +637,7 @@ B_KEY_TYPE calc_minDist_node( node_t* node_v, loc_t* loc_v)
 	range* MBR;
 
 	if( node_v->parent == NULL)
-		MBR = get_MBR_node( node_v, IRTree_v.dim);
+		MBR = get_MBR_node( node_v, RTree_v.dim);
 	else
 		MBR = node_v->parent->MBRs[ node_v->loc];
 
@@ -648,7 +648,7 @@ B_KEY_TYPE calc_minDist_node( node_t* node_v, loc_t* loc_v)
 		free( MBR);
 
 		/*s*/
-		stat_v.memory_v -= sizeof( IRTree_v.dim * sizeof( range));
+		stat_v.memory_v -= sizeof( RTree_v.dim * sizeof( range));
 		/*s*/
 	}
 
@@ -761,7 +761,7 @@ void range_query_sub( node_t* node_v, disk_t* disk_v, obj_set_t* &obj_set_v, que
 	range* MBR;
 
 	if( node_v->parent == NULL)
-		MBR = get_MBR_node( node_v, IRTree_v.dim);
+		MBR = get_MBR_node( node_v, RTree_v.dim);
 	else
 		MBR = node_v->parent->MBRs[ node_v->loc];
 
@@ -778,7 +778,7 @@ void range_query_sub( node_t* node_v, disk_t* disk_v, obj_set_t* &obj_set_v, que
 			free( MBR);
 
 			/*s*/
-			stat_v.memory_v -= IRTree_v.dim * sizeof( range);
+			stat_v.memory_v -= RTree_v.dim * sizeof( range);
 			/*s*/
 		}
 
@@ -812,7 +812,7 @@ void range_query_sub( node_t* node_v, disk_t* disk_v, obj_set_t* &obj_set_v, que
 	{
 		free( MBR);
 		/*s*/
-		stat_v.memory_v -= IRTree_v.dim * sizeof( range);
+		stat_v.memory_v -= RTree_v.dim * sizeof( range);
 		/*s*/
 	}
 }
@@ -827,7 +827,7 @@ obj_set_t* range_query( disk_t* disk_v, query_t* q)
 	obj_set_t* obj_set_v;
 
 	obj_set_v = alloc_obj_set( );
-	range_query_sub( IRTree_v.root, disk_v, obj_set_v, q);
+	range_query_sub( RTree_v.root, disk_v, obj_set_v, q);
 
 	return obj_set_v;
 }

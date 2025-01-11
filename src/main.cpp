@@ -12,7 +12,7 @@ using namespace std;
 using std::size_t;
 using std::vector;
 
-IRTree_t IRTree_v;
+RTree_t RTree_v;
 bst_t* IF_v;
 
 colocation_stat_t stat_v;
@@ -62,8 +62,8 @@ void colocation()
 #endif
 
 //    if (cfg->tree_tag == 0) { 
-    printf("Building IR-tree ...\n");
-    build_IRTree(data_v);
+    printf("Building RTree ...\n");
+    build_RTree(data_v);
     print_and_check_tree(1, cfg->tree_file);
     // }
 

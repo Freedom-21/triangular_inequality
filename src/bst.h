@@ -58,30 +58,17 @@ typedef struct bst_node_list
 
 
 bst_t* bst_ini( );
-
 void bst_release_sub( bst_node_t* x);
-
 void bst_release( bst_t* T);
-
 void bst_insert( bst_t* T, bst_node_t* z);
-
 void bst_transplant( bst_t* T, bst_node_t* u, bst_node_t* v);
-
 bst_node_t* bst_get_min( bst_node_t* x);
-
 bst_node_t* bst_get_max( bst_node_t* x);
-
 void bst_delete( bst_t* T, bst_node_t* x);
-
 void bst_update( bst_t* T, bst_node_t* x);
-
 bst_node_t* bst_successor( bst_node_t* x);
-
 bool in_order_sub( bst_node_t* &x, int &tag);
-
 bool get_next_in_order( bst_node_t* &x, int &tag);
-
 bst_node_t* bst_search( bst_t* bst_v, KEY_TYPE key);
-
 
 #endif

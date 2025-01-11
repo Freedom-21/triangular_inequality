@@ -8,7 +8,7 @@
 
 
 extern bool debug_mode;
-extern IRTree_t IRTree_v;
+extern RTree_t RTree_v;
 extern bst_t* IF_v;
 
 // extern int cost_tag;
