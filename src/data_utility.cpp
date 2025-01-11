@@ -1,17 +1,11 @@
 #include "data_utility.h"
-#include "irtree.h"
+#include "rtree.h"
 
 #include <unordered_map>
 
 #ifndef WIN32
 
-/*
- * GetCurTime is used to get the current running time in the current process.
- *
- * @Param curTime gets back the time information.
- *
- * @Return void.
- */
+// GetCurTime is used to get the current running time in the current process.
 void GetCurTime(rusage* curTime)
 {
     int ret = getrusage(RUSAGE_SELF, curTime);
@@ -22,14 +16,7 @@ void GetCurTime(rusage* curTime)
     }
 }
 
-/*
- * GetTime is used to get the 'float' format time from the start and end rusage structure.
- *
- * @Param timeStart, timeEnd indicate the two time points.
- * @Param userTime, sysTime get back the time information.
- *
- * @Return void.
- */
+//  GetTime is used to get the 'float' format time from the start and end rusage structure.
 void GetTime(struct rusage* timeStart, struct rusage* timeEnd, float* userTime, float* sysTime)
 {
     (*userTime) = ((float)(timeEnd->ru_utime.tv_sec - timeStart->ru_utime.tv_sec)) + ((float)(timeEnd->ru_utime.tv_usec - timeStart->ru_utime.tv_usec)) * 1e-6;
@@ -38,10 +25,6 @@ void GetTime(struct rusage* timeStart, struct rusage* timeEnd, float* userTime, 
 
 #endif
 
-/*
- *	Read the configuration for the Co-location mining problem.
- *  return an colocation_config_t pointer pointing to an object that storing the config
- */
 colocation_config_t* read_config_colocation()
 {
     colocation_config_t* cfg;
@@ -60,17 +43,12 @@ colocation_config_t* read_config_colocation()
 
     //data.
     fscanf(c_fp, "%i%s", &cfg->obj_n, cfg->loc_file);
-
     fscanf(c_fp, "%i%s", &cfg->key_n, cfg->doc_file);
-
     fscanf(c_fp, "%s", cfg->tree_file);
-    // fscanf(c_fp, "%i%s", &cfg->tree_tag, cfg->tree_file);
-
     fscanf(c_fp, "%i", &cfg->query_n);
 
     //colocation pattern mining.
-    fscanf(c_fp, "%f", &cfg->min_sup);
-	//fscanf(c_fp, "%f", &cfg->min_conf);
+    fscanf(c_fp, "%f", &cfg->min_pi);
     fscanf(c_fp, "%f", &cfg->dist_thr);
 
     fclose(c_fp);
@@ -78,9 +56,6 @@ colocation_config_t* read_config_colocation()
     return cfg;
 }
 
-/*
- *	Add a key to the keyword list. //!!k_node_v is the pointer pointing the last element of the list!!
- */
 void add_keyword_entry(k_node_t*& k_node_v, KEY_TYPE key)
 {
     k_node_v->next = (k_node_t*)malloc(sizeof(k_node_t));
@@ -95,9 +70,6 @@ void add_keyword_entry(k_node_t*& k_node_v, KEY_TYPE key)
     /*s*/
 }
 
-/*
- *	Print the statistics maintained in stat_v.
- */
 void print_colocation_stat(colocation_config_t* cfg, int cnt)
 {
     FILE* s_fp;
@@ -106,7 +78,7 @@ void print_colocation_stat(colocation_config_t* cfg, int cnt)
         exit(EXIT_FAILURE);
     }
 
-    fprintf(s_fp, "R-tree Build Time: %.6f seconds\n", stat_v.irtree_build_time);
+    fprintf(s_fp, "R-tree Build Time: %.6f seconds\n", stat_v.rtree_build_time);
     fprintf(s_fp, "Average Query Time: %.6f seconds\n\n", stat_v.q_time);
 
     fprintf(s_fp, "Memory usage (MB)\tR-tree memory usage (MB)\n");
@@ -122,9 +94,7 @@ void print_colocation_stat(colocation_config_t* cfg, int cnt)
 
     fclose(s_fp);
 }
-/*
- *	Allocate the memory for an object.
- */
+
 void alloc_obj(obj_t* obj_v, int dim)
 {
     obj_v->MBR = (range*)malloc(dim * sizeof(range));
@@ -203,9 +173,6 @@ data_t* read_data_colocation(colocation_config_t* cfg)
     return data_v;
 }
 
-/*
- *	Release a list.
- */
 void release_k_list(k_node_t* k_node_v)
 {
     k_node_t* k_node_v1;
@@ -217,9 +184,6 @@ void release_k_list(k_node_t* k_node_v)
     free(k_node_v);
 }
 
-/*
- *	IRTree_free_data release the data read by 'IRTree_read_data'.
- */
 void release_data(data_t* data_v)
 {
     int i;

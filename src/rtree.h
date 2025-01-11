@@ -190,7 +190,7 @@ data_t*	IRTree_read_data( IRTree_config_t* cfg);
 void IRTree_free_data( data_t* data_v);
 
 //Generate the IR-trees of the datasets.
-void gen_irtree( );
+void gen_rtree( );
 
 
 #endif

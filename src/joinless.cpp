@@ -1,4 +1,4 @@
-#include "yoo_alg.h"
+#include "joinless.h"
 
 /*
  * The implementation of joinless colocation mining algorithm.
@@ -82,7 +82,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                         // if (cost_tag == 1) //participation based
                         sup = comp_PI(fsi_v3, NULL);
 
-                        if (sup < min_sup) {
+                        if (sup < min_pi) {
                             //fsi_v3 is not a frequent pattern
                             for (auto i = fsi_v3->obj_set_list_v->begin(); i != fsi_v3->obj_set_list_v->end(); ++i)
                                 release_obj_set(*i);
@@ -106,7 +106,7 @@ fsi_set_t** joinless_mining(data_t* data_v, int numOfObj, int numOfFea)
                     //     sup = comp_sup(fsi_v3, NULL);
 
                     //----------------------------
-                    if (sup >= min_sup)
+                    if (sup >= min_pi)
                         add_fsi_set_entry(fsi_set_cur, fsi_v3);
                     else {
                         //fsi_v3 is not a frequent pattern
@@ -174,7 +174,7 @@ unordered_map<FEA_TYPE, vector<obj_set_t*>*> gen_star_neighborhoods(data_t* data
 		bst_node_t* bst_node_v =  bst_search(IF_v, fea);
 		if(bst_node_v !=NULL){
 			double n = bst_node_v->p_list_obj->obj_n;
-			if(n<fea_highest_freq*min_sup){
+			if(n<fea_highest_freq*min_pi){
 				continue;
 			}
 		}

@@ -11,7 +11,7 @@
 
 #define FEA_TYPE    unsigned int
 
-//From irtree.h
+//From rtree.h
 //The interval structure of one dimension.
 typedef struct 
 {
@@ -129,7 +129,7 @@ typedef struct colocation_stat
 {
 	//time.
 	float		q_time;
-	float		irtree_build_time;
+	float		rtree_build_time;
 
 	//memory.
 	double		memory_v;

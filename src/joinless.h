@@ -1,9 +1,9 @@
-#ifndef yoo_alg_h
-#define yoo_alg_h
+#ifndef joinless_h
+#define joinless_h
 
 #include <stdio.h>
 #include "data_utility.h"
-#include "irtree.h"
+#include "rtree.h"
 #include "joinless_utility.h"
 #include <vector>
 
@@ -29,4 +29,4 @@ bool check_obj_set_equal(obj_set_t* v1, obj_set_t* v2, FEA_TYPE fea);
 
 bool obj_exist(vector<obj_set_t*>* obj_set_list_v, obj_t* obj_v);
 
-#endif /* yoo_alg_hpp */
+#endif /* joinless_hpp */

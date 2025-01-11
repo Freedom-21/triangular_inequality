@@ -1,9 +1,9 @@
-#ifndef COSTENUM_H
-#define	COSTENUM_H
+#ifndef JOINLESS_U
+#define	JOINLESS_U
 
 #include "data_struct.h"
-#include "irtree.h"
-#include "frac.h"
+#include "rtree.h"
+#include "improved.h"
 
 extern  float dist_thr;
 extern IRTree_t IRTree_v;

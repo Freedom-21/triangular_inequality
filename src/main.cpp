@@ -1,6 +1,6 @@
-#include "yoo_alg.h"
-#include "irtree.h"
-#include "frac.h"
+#include "joinless.h"
+#include "rtree.h"
+#include "improved.h"
 #include "data_utility.h"
 #include <iostream>
 #include <fstream>
@@ -20,7 +20,7 @@ colocation_stat_t stat_v;
 bool debug_mode = false;
 
 float dist_thr;
-float min_sup;
+float min_pi;
 double fea_highest_freq;
 
 void colocation();
@@ -50,7 +50,7 @@ void colocation()
     cfg->dim = 2;
 
     dist_thr = cfg->dist_thr;
-    min_sup = cfg->min_sup;
+    min_pi = cfg->min_pi;
     printf("Reading data ...\n");
     data_v = read_data_colocation(cfg);
 
@@ -69,16 +69,16 @@ void colocation()
 
 #ifndef WIN32
     GetCurTime(&IR_tree_end);
-    GetTime(&IR_tree_sta, &IR_tree_end, &stat_v.irtree_build_time, &sys_t);
+    GetTime(&IR_tree_sta, &IR_tree_end, &stat_v.rtree_build_time, &sys_t);
 #endif
 
     //Build Inverted file
     build_IF(data_v);
 
     if (cfg->alg_opt == 1) {
-        printf("Redirected to the Joinless Algorithm with threshold prevalnce:%lf\n", min_sup);
+        printf("Redirected to the Joinless Algorithm with threshold prevalnce:%lf\n", min_pi);
     } else {
-        printf("Redirected to the Improved Algorithm with threshold prevalnce:%lf\n", min_sup);
+        printf("Redirected to the Improved Algorithm with threshold prevalnce:%lf\n", min_pi);
     }
 
 #ifndef WIN32

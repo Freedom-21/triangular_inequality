@@ -1,5 +1,5 @@
 
-#include "frac.h"
+#include "improved.h"
 // #include "distance_cache.h"
 #include "data_struct.h" // Ensure this is included if not already
 #include <cassert>
@@ -97,11 +97,11 @@ fsi_set_t** apriori(int alg_opt, int numOfObj, int numOfFea, double dist_thr)
                 // for(int f = 0; f < fsi_v3->fea_n; f++) printf(" %d", fsi_v3->feaset[f]);
                 // printf(" is %.5lf\n", sup);
 
-                if (sup >= min_sup) {
+                if (sup >= min_pi) {
                     // printf("Adding candidate set to Level P_%d\n", i + 1);
                     add_fsi_set_entry(fsi_set_cur, fsi_v3);
                 } else {
-                    // printf("Candidate set does not meet min_sup and is discarded.\n");
+                    // printf("Candidate set does not meet min_pi and is discarded.\n");
                     /* Update memory statistics */
                     stat_v.memory_v -= sizeof(fsi_t) + fsi_v3->fea_n * sizeof(FEA_TYPE);
                     /* Update memory statistics */
@@ -303,7 +303,7 @@ B_KEY_TYPE comp_support(int alg_opt, fsi_t* fsi_v, int numOfObj)
             sup = sup_C_f;
 
             // early stopping: sup of this fea set < threshold
-            if (sup < min_sup)
+            if (sup < min_pi)
                 break;
         }
     }
@@ -716,7 +716,7 @@ void precomputation(data_t* data_v, B_KEY_TYPE dist_thr)
 		bst_node_t* bst_node_v =  bst_search(IF_v, fea);
 		if(bst_node_v !=NULL){
 			double n = bst_node_v->p_list_obj->obj_n;
-			if(n<fea_highest_freq*min_sup){
+			if(n<fea_highest_freq*min_pi){
 				continue;
 			}
 		}

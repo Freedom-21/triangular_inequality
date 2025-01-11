@@ -1,9 +1,9 @@
-#ifndef frac_h
-#define frac_h
+#ifndef improved_h
+#define improved_h
 
 #include <stdio.h>
 #include "data_utility.h"
-#include "irtree.h"
+#include "rtree.h"
 #include "data_struct_operation.h"
 
 
@@ -14,7 +14,7 @@ extern bst_t* IF_v;
 // extern int cost_tag;
 extern double fea_highest_freq;
 extern float dist_thr;
-extern float min_sup;
+extern float min_pi;
 
 
 /*------------------------ Apriori ------------------------ */
@@ -74,4 +74,4 @@ B_KEY_TYPE min_frac_receive(fsi_t* fsi_v, obj_t* obj_v);
 
 void precomputation(data_t* data_v, KEY_TYPE dist_thr);
 
-#endif /* frac_h */
+#endif /* improved_h */
