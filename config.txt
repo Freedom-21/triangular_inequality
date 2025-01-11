@@ -1,1 +1,1 @@
-1	671435	datasetGen/mc3_synthetic_loc.csv	564	datasetGen/mc3_synthetic_id.csv	real_tree.txt	1	0.7	50
+1	15	datasetGen/test_loc2.csv 	9	datasetGen/test_id2.csv 	test_tree.txt	1	0	10

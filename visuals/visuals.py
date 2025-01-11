@@ -14,13 +14,13 @@ import matplotlib.cm as cm
 # For hover labels
 import mplcursors
 
-loc_file = '../datasetGen/synthetic_loc1.csv'
-id_file = '../datasetGen/synthetic_id1.csv'
-# loc_file = "syn_loc.csv"
-# id_file = "syn_doc.csv"
+# loc_file = '../datasetGen/mc4_synthetic_loc.csv'
+# id_file = '../datasetGen/mc4_synthetic_id.csv'
+loc_file = "storm2023_loc.csv"
+id_file = "storm2023_id.csv"
 
-# loc_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/syn_loc8.txt'
-# id_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/syn_doc8.txt'
+# loc_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/storm2023_loc.csv'
+# id_file = '/home/freedom/triangular_inequality/apriori_with_triangular/datasets/storm2023_id.csv'
 
 loc_data = pd.read_csv(loc_file, header=None, names=['objectId', 'X', 'Y'])
 id_data = pd.read_csv(id_file, header=None, names=['objectId', 'featureId'])
